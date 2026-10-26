@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shared Schedule Planner</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2230;--mute:#667085;--line:#e3e6ec;--accent:#2f5bea;--warn:#b54708;--warnbg:#fff4e5;--ok:#1a7f45;--okbg:#e8f6ee;--head:#fafbfc;--soft:#eef0f4;--free:#9ddcb6;--busy:#dfe3ea;--unk1:#f4f5f7;--unk2:#e3e5ea;--study:#f4f7ff;--danger:#b42318;color-scheme:light}
+:root[data-theme=dark]{--bg:#0f131a;--card:#1a202b;--ink:#e8ecf3;--mute:#9aa4b5;--line:#2c3544;--accent:#6c8cff;--warn:#f5b361;--warnbg:#3a2a12;--ok:#5ad08a;--okbg:#12301f;--head:#161c26;--soft:#252d3a;--free:#2e7d52;--busy:#3a4455;--unk1:#1a202b;--unk2:#2a3240;--study:#1d2536;--danger:#f97066;color-scheme:dark}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f131a;--card:#1a202b;--ink:#e8ecf3;--mute:#9aa4b5;--line:#2c3544;--accent:#6c8cff;--warn:#f5b361;--warnbg:#3a2a12;--ok:#5ad08a;--okbg:#12301f;--head:#161c26;--soft:#252d3a;--free:#2e7d52;--busy:#3a4455;--unk1:#1a202b;--unk2:#2a3240;--study:#1d2536;--danger:#f97066;color-scheme:dark}}
+:root[data-theme=dark] .tg.ev .blk,:root[data-theme=dark] .dot{filter:brightness(1.35)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tg.ev .blk,:root:not([data-theme=light]) .dot{filter:brightness(1.35)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:12px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+h1{font-size:20px;margin:0}h3{margin:0 0 8px}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.link{background:none;border:0;color:var(--accent);padding:4px}
+nav{display:flex;gap:4px;margin-bottom:10px;overflow-x:auto}
+nav button{flex:1;white-space:nowrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink)}
+nav button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mute,.hint{color:var(--mute)}.hint{font-size:13px;margin:8px 0 0}
+input,select{font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;width:100%;background:var(--card);color:var(--ink)}
+input[type=checkbox]{width:auto}
+input[type=color]{width:44px;height:36px;padding:2px;flex:none}
+label{display:block;font-size:13px;color:var(--mute);margin-bottom:8px}
+label.chk{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--ink)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.plist{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.prow{display:flex;gap:8px}.pick{flex:1;text-align:left;padding:12px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;font-size:16px}
+.x{background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--danger);padding:0 12px}
+.weeknav{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.weeknav button{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 12px}
+.status{margin-top:10px;padding:8px 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.status.ok{background:var(--okbg);color:var(--ok)}.status.warn{background:var(--warnbg);color:var(--warn)}
+.banner{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 12px}
+.chip.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
+.chip:disabled{opacity:.7;cursor:default}
+.chip small{opacity:.65;margin-left:4px}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--mute);margin-bottom:8px;flex-wrap:wrap}
+.legend span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-2px;background:var(--b)}
+/* time grid: columns are positioned by minute, not fixed cells */
+.tg{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;user-select:none;-webkit-user-select:none;margin-bottom:10px}
+.tg-head,.tg-body{display:grid;grid-template-columns:42px repeat(7,minmax(0,1fr))}
+.gh{padding:6px 2px;text-align:center;font-size:12px;border-bottom:1px solid var(--line);background:var(--head)}
+.gh small{color:var(--mute);font-size:10px}.gh.today{color:var(--accent);font-weight:700}
+.tg-times{position:relative}
+.tg-times span{position:absolute;right:4px;font-size:10px;color:var(--mute);transform:translateY(-50%)}
+.tg-times span.first{transform:none;top:2px}
+.tg-col{position:relative;border-left:1px solid var(--line);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(var(--soft) 1px,transparent 1px);background-size:100% var(--pph),100% var(--pph);background-position:0 0,0 calc(var(--pph)/2)}
+.tg.edit .tg-col{cursor:crosshair}
+.tg-col.unk{background-image:repeating-linear-gradient(45deg,var(--unk1),var(--unk1) 4px,var(--unk2) 4px,var(--unk2) 8px);background-size:auto;background-position:0 0}
+.blk{position:absolute;border-radius:4px;font-size:11px;line-height:1.15;padding:1px 3px;overflow:hidden;border:1px solid rgba(0,0,0,.28);cursor:pointer;word-break:break-word}
+.blk.priv{border-style:dashed}
+.blk.sel{outline:2px solid var(--ink);outline-offset:1px;z-index:2}
+.band{position:absolute;left:0;right:0;background:rgba(47,91,234,.3);outline:2px solid var(--accent);outline-offset:-2px;pointer-events:none;z-index:3}
+.freew{position:absolute;left:2px;right:2px;background:var(--free);border-radius:4px;pointer-events:none}
+.busyw{position:absolute;left:0;right:0;background:var(--busy);pointer-events:none}
+ul.win{margin:8px 0 0;padding-left:18px}
+.task{border-top:1px solid var(--line);padding:10px 0}.task:first-child{border-top:0}
+.task.done .tt{text-decoration:line-through;color:var(--mute)}
+.badge{font-size:11px;border-radius:999px;padding:1px 8px;background:var(--soft);margin-left:6px}
+.over{color:var(--danger);font-weight:600}
+.study{background:var(--study);border-radius:8px;padding:8px 12px;margin-top:8px}
+.err{color:var(--danger);font-size:13px;margin:6px 0}
+.erow{display:flex;align-items:center;gap:6px;padding:6px 0;border-top:1px solid var(--line)}
+.erow:first-of-type{border-top:0}.erow>span:nth-child(2){flex:1}
+.trow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.trow input[type=text]{flex:1;min-width:0}
+@media(max-width:520px){.row2{grid-template-columns:1fr}.tg-head,.tg-body{grid-template-columns:34px repeat(7,minmax(0,1fr))}.blk{font-size:10px;padding:0 1px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- ============ PURE LOGIC (no DOM, no storage). Tested by test-logic.js ============ -->
+<script id="logic">
+const Logic = (() => {
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const DEFAULT_HOURS = { start: 7, end: 23 };
+  const DEFAULT_TYPES = [
+    { id: 'class', name: 'Class', color: '#3b6fd4', repeat: 'weekly' },
+    { id: 'work', name: 'Work', color: '#e07b00', repeat: 'week' }
+  ];
+  const SLOT = 30; // only used for scoring study slots
+  const pad = n => String(n).padStart(2, '0');
+
+  function fmtTime(min) {
+    const h24 = Math.floor(min / 60) % 24, m = min % 60;
+    return (h24 % 12 === 0 ? 12 : h24 % 12) + (m ? ':' + pad(m) : '') + ' ' + (h24 >= 12 ? 'PM' : 'AM');
+  }
+  function fmtDur(min) {
+    const h = Math.floor(min / 60), m = min % 60;
+    return (h ? h + 'h' : '') + (h && m ? ' ' : '') + (m ? m + 'm' : '');
+  }
+  // 'HH:MM' (from <input type=time>) <-> minutes. An END of 00:00 means midnight (1440).
+  function parseTimeInput(str, isEnd) {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(String(str || '').trim());
+    if (!m) return null;
+    const h = +m[1], mi = +m[2];
+    if (h > 23 || mi > 59) return null;
+    const v = h * 60 + mi;
+    return isEnd && v === 0 ? 1440 : v;
+  }
+  function fmtTimeInput(min) { return min >= 1440 ? '00:00' : pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
+  function snapFloor(min, snap) { return Math.floor(min / snap) * snap; }
+
+  // Dates are 'YYYY-MM-DD' strings; all math in UTC to avoid DST/timezone bugs.
+  function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); }
+  function fmtDate(dt) { return dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate()); }
+  function addDays(s, n) { const d = parseDate(s); d.setUTCDate(d.getUTCDate() + n); return fmtDate(d); }
+  function mondayOf(s) { const d = parseDate(s); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return fmtDate(d); }
+  function daysBetween(a, b) { return Math.round((parseDate(b) - parseDate(a)) / 86400000); }
+
+  // Intervals are [start,end] in minutes.
+  function normalize(iv) {
+    const a = iv.filter(x => x[1] > x[0]).map(x => [x[0], x[1]]).sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+    const out = [];
+    for (const x of a) {
+      const last = out[out.length - 1];
+      if (last && x[0] <= last[1]) last[1] = Math.max(last[1], x[1]); else out.push(x);
+    }
+    return out;
+  }
+  function subtract(base, remove) {
+    const rem = normalize(remove), out = [];
+    for (const [s0, e0] of normalize(base)) {
+      let s = s0;
+      for (const [rs, re] of rem) {
+        if (re <= s || rs >= e0) continue;
+        if (rs > s) out.push([s, rs]);
+        s = Math.max(s, re);
+        if (s >= e0) break;
+      }
+      if (s < e0) out.push([s, e0]);
+    }
+    return out;
+  }
+
+  // weekDate null/undefined = repeats every week. Otherwise the block only counts in that week (a Monday).
+  // Recurrence lives on the block itself, so this never needs the type table.
+  function blocksInWeek(blocks, personId, weekDate) {
+    return blocks.filter(b => b.personId === personId && (b.weekDate == null || b.weekDate === weekDate));
+  }
+  function isConfirmed(confs, personId, weekDate) {
+    return confs.some(c => c.personId === personId && c.weekDate === weekDate);
+  }
+  function busyByDay(blocks, personIds, weekDate) {
+    const days = [[], [], [], [], [], [], []];
+    for (const pid of personIds) for (const b of blocksInWeek(blocks, pid, weekDate)) days[b.day].push([b.start, b.end]);
+    return days.map(normalize);
+  }
+
+  // Windows where ALL personIds are free. If anyone is unconfirmed for that week,
+  // their time is unknown, so NO windows are returned (never treated as free).
+  function freeWindows({ personIds, blocks, confirmations, weekDate, dayStart = DEFAULT_HOURS.start * 60, dayEnd = DEFAULT_HOURS.end * 60, minLen = 60 }) {
+    const unconfirmedIds = personIds.filter(id => !isConfirmed(confirmations, id, weekDate));
+    if (unconfirmedIds.length) return { windows: [], unconfirmedIds, blocked: true };
+    if (!personIds.length) return { windows: [], unconfirmedIds: [], blocked: false };
+    const windows = [];
+    busyByDay(blocks, personIds, weekDate).forEach((busy, day) => {
+      for (const [s, e] of subtract([[dayStart, dayEnd]], busy)) if (e - s >= minLen) windows.push({ day, start: s, end: e });
+    });
+    return { windows, unconfirmedIds: [], blocked: false };
+  }
+
+  // ---- Blocks and types ----
+  function validateBlock(b, types) {
+    const errors = [];
+    if (!Number.isInteger(b.day) || b.day < 0 || b.day > 6) errors.push('Pick a valid day.');
+    if (!Number.isInteger(b.start) || !Number.isInteger(b.end) || b.start < 0 || b.end > 1440) errors.push('Times must be within one day.');
+    else if (b.end <= b.start) errors.push('End time must be after start time.');
+    if (!types.some(t => t.id === b.type)) errors.push('Pick an event type.');
+    if ((b.label || '').length > 40) errors.push('Label is too long (40 characters max).');
+    return errors;
+  }
+  function validateType(t, types) {
+    const errors = [], name = (t.name || '').trim();
+    if (!name) errors.push('Type name is required.');
+    else if (name.length > 20) errors.push('Type name is too long (20 characters max).');
+    else if (types.some(x => x.id !== t.id && x.name.trim().toLowerCase() === name.toLowerCase())) errors.push('A type with that name already exists.');
+    if (!/^#[0-9a-f]{6}$/i.test(t.color || '')) errors.push('Pick a valid color.');
+    if (!['weekly', 'week'].includes(t.repeat)) errors.push('Pick how the type repeats.');
+    return errors;
+  }
+  // A weekly type stores weekDate null. A this-week type keeps its week, or takes the week being viewed.
+  function weekDateFor(type, existingWeekDate, viewWeek) {
+    return type.repeat === 'weekly' ? null : (existingWeekDate || viewWeek);
+  }
+  // What another person is allowed to see about a block.
+  function blockDetail(b, type, viewerId) {
+    if (b.private && b.personId !== viewerId) return 'Busy';
+    return type.name + (b.label ? ': ' + b.label : '') + (b.private ? ' (private)' : '');
+  }
+  // Pick black or white text, whichever has more contrast on the given #rrggbb.
+  const DARK_TEXT = '#1c2230';
+  function lum(hex) {
+    const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function contrastText(hex) {
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) return '#fff';
+    const L = lum(hex), white = 1.05 / (L + 0.05), dark = (L + 0.05) / (lum(DARK_TEXT) + 0.05);
+    return dark > white ? DARK_TEXT : '#fff';
+  }
+  // Side-by-side lanes for overlapping blocks within one day. Returns { id: {lane, lanes} }.
+  function layoutLanes(blocks) {
+    const items = blocks.slice().sort((a, b) => a.start - b.start || b.end - a.end);
+    const out = {}; let cluster = [], clusterEnd = -1, laneEnds = [];
+    const flush = () => { const n = laneEnds.length; cluster.forEach(id => { out[id].lanes = n; }); cluster = []; laneEnds = []; clusterEnd = -1; };
+    for (const b of items) {
+      if (cluster.length && b.start >= clusterEnd) flush();
+      let lane = laneEnds.findIndex(e => e <= b.start);
+      if (lane < 0) { lane = laneEnds.length; laneEnds.push(b.end); } else laneEnds[lane] = b.end;
+      out[b.id] = { lane, lanes: 0 }; cluster.push(b.id); clusterEnd = Math.max(clusterEnd, b.end);
+    }
+    flush();
+    return out;
+  }
+  // Copy every week-specific block of a person from one week to another (weekly blocks need no copying).
+  function copyWeekBlocks(blocks, personId, fromWeek, toWeek, genId) {
+    const mine = w => blocks.filter(b => b.personId === personId && b.weekDate === w);
+    return {
+      remove: mine(toWeek).map(b => b.id),
+      add: mine(fromWeek).map(b => ({ id: genId(), personId, day: b.day, start: b.start, end: b.end, type: b.type, weekDate: toWeek, label: b.label || '', private: !!b.private }))
+    };
+  }
+
+  // ---- Tasks ----
+  const CATEGORIES = ['shared', 'group', 'personal'];
+  function effectiveAssignees(task, people) {
+    return task.category === 'shared' ? people.map(p => p.id) : task.assigneeIds.filter(id => people.some(p => p.id === id));
+  }
+  function validateTask(t, people) {
+    const errors = [];
+    if (!t.title || !t.title.trim()) errors.push('Title is required.');
+    if (!CATEGORIES.includes(t.category)) errors.push('Pick a category.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(t.dueDate || '')) errors.push('Due date is required.');
+    const n = t.category === 'shared' ? people.length : (t.assigneeIds || []).length;
+    if (t.category === 'group' && n < 2) errors.push('Group tasks need at least 2 people.');
+    if (t.category === 'personal' && n !== 1) errors.push('Personal tasks need exactly 1 person.');
+    return errors;
+  }
+  function cascadeRemovePerson(db, personId) {
+    const upsertTasks = [], deleteTaskIds = [];
+    for (const t of db.tasks) {
+      if (!t.assigneeIds.includes(personId)) continue;
+      const rest = t.assigneeIds.filter(id => id !== personId);
+      if (t.category === 'shared') upsertTasks.push({ ...t, assigneeIds: rest });
+      else if (!rest.length) deleteTaskIds.push(t.id);
+      else upsertTasks.push({ ...t, assigneeIds: rest, category: rest.length === 1 ? 'personal' : t.category });
+    }
+    return {
+      blockIds: db.blocks.filter(b => b.personId === personId).map(b => b.id),
+      confIds: db.confirmations.filter(c => c.personId === personId).map(c => c.id),
+      upsertTasks, deleteTaskIds
+    };
+  }
+
+  // ---- Study slot suggestions ----
+  function todWeight(m) { const h = m / 60; return (h >= 10 && h < 20) ? 3 : (((h >= 8 && h < 10) || (h >= 20 && h < 22)) ? 2 : 1); }
+  // Best sub-window of length len inside [start,end]. Candidate starts: the window's own start
+  // (e.g. 11:40 right after a class) plus every :00/:30 inside it.
+  function bestSub(start, end, len) {
+    const starts = [start];
+    for (let s = Math.ceil(start / SLOT) * SLOT; s + len <= end; s += SLOT) if (s > start) starts.push(s);
+    let best = null;
+    for (const s of starts) {
+      if (s + len > end) continue;
+      let w = 0, n = 0; for (let m = s; m < s + len; m += SLOT) { w += todWeight(m); n++; }
+      if (!best || w / n > best.w / best.n) best = { s, w, n };
+    }
+    return best;
+  }
+  // Slots fall on days strictly BEFORE dueDate, only in weeks where every assignee confirmed.
+  function suggestStudySlots({ task, personIds, blocks, confirmations, today, nowMin = 0, minLen = 60, maxLen = 120, maxResults = 6, maxWeeks = 8, maxPerDay = 2, dayStart = DEFAULT_HOURS.start * 60, dayEnd = DEFAULT_HOURS.end * 60 }) {
+    const out = { slots: [], skippedWeeks: [], truncated: false, status: 'ok' };
+    if (!personIds.length) { out.status = 'no-assignees'; return out; }
+    const lastDate = addDays(task.dueDate, -1);
+    if (lastDate < today) { out.status = 'no-time-left'; return out; }
+    let week = mondayOf(today), n = 0;
+    const cands = [];
+    while (week <= lastDate && n < maxWeeks) {
+      const r = freeWindows({ personIds, blocks, confirmations, weekDate: week, dayStart, dayEnd, minLen });
+      if (r.blocked) out.skippedWeeks.push({ weekDate: week, unconfirmedIds: r.unconfirmedIds });
+      else for (const w of r.windows) {
+        const date = addDays(week, w.day);
+        if (date < today || date > lastDate) continue;
+        let s = w.start;
+        if (date === today) s = Math.max(s, Math.ceil(nowMin / SLOT) * SLOT);
+        if (w.end - s < minLen) continue;
+        const len = Math.min(maxLen, w.end - s);
+        const b = bestSub(s, w.end, len);
+        const score = (b.w / b.n) * 2 + Math.min(len, 120) / 60 + Math.min(daysBetween(date, task.dueDate), 4) * 0.5;
+        cands.push({ date, day: w.day, start: b.s, end: b.s + len, score });
+      }
+      week = addDays(week, 7); n++;
+    }
+    out.truncated = week <= lastDate;
+    cands.sort((a, b) => b.score - a.score || (a.date < b.date ? -1 : a.date > b.date ? 1 : a.start - b.start));
+    const perDay = {};
+    for (const c of cands) {
+      if (out.slots.length >= maxResults) break;
+      if ((perDay[c.date] || 0) >= maxPerDay) continue;
+      perDay[c.date] = (perDay[c.date] || 0) + 1;
+      out.slots.push(c);
+    }
+    if (!out.slots.length) out.status = out.skippedWeeks.length ? 'waiting-confirmation' : 'no-windows';
+    return out;
+  }
+
+  return { DAYS, DEFAULT_HOURS, DEFAULT_TYPES, fmtTime, fmtDur, parseTimeInput, fmtTimeInput, snapFloor, parseDate, addDays, mondayOf,
+    daysBetween, normalize, subtract, blocksInWeek, isConfirmed, busyByDay, freeWindows, validateBlock, validateType, weekDateFor,
+    blockDetail, contrastText, layoutLanes, copyWeekBlocks, effectiveAssignees, validateTask, cascadeRemovePerson, suggestStudySlots };
+})();
+if (typeof module !== 'undefined') module.exports = Logic;
+</script>
+
+<!-- ============ STORAGE ADAPTER ============
+Swap this object for Supabase/Firebase later. Contract (all async):
+  loadAll() -> {people,blocks,confirmations,tasks,types}
+  upsert(table, rowOrRows)   rows are plain objects with a string `id`
+  remove(table, idOrIds)
+  onExternalChange(cb)       call cb() when other clients change data (realtime)
+Tables map 1:1 to database tables with the same field names. `blocks.type` holds a `types.id`. -->
+<script id="storage">
+const Repo = (() => {
+  const KEY = 'sp.db.v1';
+  const empty = () => ({ people: [], blocks: [], confirmations: [], tasks: [], types: [] });
+  const read = () => { try { return Object.assign(empty(), JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) { return empty(); } };
+  const write = db => localStorage.setItem(KEY, JSON.stringify(db));
+  return {
+    async loadAll() { return read(); },
+    async upsert(table, rows) {
+      const db = read();
+      for (const r of [].concat(rows)) {
+        const i = db[table].findIndex(x => x.id === r.id);
+        if (i >= 0) db[table][i] = r; else db[table].push(r);
+      }
+      write(db);
+    },
+    async remove(table, ids) {
+      const set = new Set([].concat(ids)), db = read();
+      db[table] = db[table].filter(x => !set.has(x.id));
+      write(db);
+    },
+    onExternalChange(cb) { window.addEventListener('storage', e => { if (e.key === KEY) cb(); }); }
+  };
+})();
+</script>
+
+<!-- ============ UI ============ -->
+<script id="ui">
+const L = Logic, DAYS = Logic.DAYS;
+const PPH = 44; // pixels per hour in the time grid
+const PALETTE = ['#0072B2', '#E69F00', '#CC79A7', '#882255', '#56B4E9', '#332288', '#DDCC77', '#999999'];
+const TYPE_COLORS = ['#3b6fd4', '#e07b00', '#2a9d8f', '#8e5bd1', '#d1495b', '#6a994e', '#c9a227', '#5c6b7a'];
+const $app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+const pad2 = n => String(n).padStart(2, '0');
+const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+const fmtShort = s => L.parseDate(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+const fmtLong = s => L.parseDate(s).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+const confId = (pid, wk) => pid + '|' + wk;
+
+const PK = 'sp.prefs.v1';
+const loadPrefs = () => { try { return JSON.parse(localStorage.getItem(PK)) || {}; } catch (e) { return {}; } };
+const applyTheme = () => { if (S.theme === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', S.theme); };
+const THEMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+const newForm = () => ({ title: '', category: 'shared', assigneeIds: [], dueDate: '' });
+const P = loadPrefs();
+const S = {
+  db: { people: [], blocks: [], confirmations: [], tasks: [], types: [] },
+  me: P.me || null, tab: P.tab || 'mine', week: L.mondayOf(todayStr()),
+  visible: P.visible || {}, gapSel: P.gapSel || null, minLen: P.minLen || 60,
+  hStart: Number.isInteger(P.hStart) ? P.hStart : 7, hEnd: Number.isInteger(P.hEnd) ? P.hEnd : 23, snap: P.snap || 15,
+  typeSel: P.typeSel || 'class', theme: P.theme || 'auto',
+  newLabel: '', newPrivate: false, newDays: [], timeStart: '09:00', timeEnd: '10:00', addErr: [],
+  editBlock: null, editForm: null, editErr: [], peek: null,
+  newType: { name: '', color: TYPE_COLORS[2], repeat: 'weekly' }, typeErr: '',
+  filter: 'all', form: newForm(), editing: null, formErr: [], studyFor: null,
+  anchor: null, drag: null, managing: false
+};
+function savePrefs() {
+  try { localStorage.setItem(PK, JSON.stringify({ me: S.me, tab: S.tab, visible: S.visible, gapSel: S.gapSel, minLen: S.minLen, hStart: S.hStart, hEnd: S.hEnd, snap: S.snap, typeSel: S.typeSel, theme: S.theme })); } catch (e) {}
+}
+async function act(fn) { await fn(); S.db = await Repo.loadAll(); render(); }
+const person = id => S.db.people.find(p => p.id === id);
+const names = ids => ids.map(i => person(i)).filter(Boolean).map(p => esc(p.name)).join(', ');
+const selIds = () => { const ids = S.db.people.map(p => p.id); return S.gapSel ? S.gapSel.filter(i => ids.includes(i)) : ids; };
+const FALLBACK_T = { id: '?', name: 'Unknown', color: '#888888', repeat: 'week' };
+const tOf = id => S.db.types.find(t => t.id === id) || FALLBACK_T;
+const curType = () => S.db.types.find(t => t.id === S.typeSel) || S.db.types[0];
+const hs = () => S.hStart * 60, he = () => S.hEnd * 60;
+const resetTransient = () => { S.editBlock = null; S.editForm = null; S.editErr = []; S.peek = null; S.anchor = null; };
+
+// ---------- time grid ----------
+function place(s, e) {
+  const a = Math.max(s, hs()), b = Math.min(e, he());
+  return b <= a ? null : { top: (a - hs()) / 60 * PPH, h: (b - a) / 60 * PPH };
+}
+function boxHTML(cls, s, e) {
+  const p = place(s, e); if (!p) return '';
+  return `<div class="${cls}" style="top:${p.top}px;height:${p.h}px"></div>`;
+}
+function blkHTML(b, o) {
+  const p = place(b.start, b.end); if (!p) return '';
+  return `<div class="blk ${o.cls || ''}" data-id="${b.id}" title="${esc(o.title || '')}" style="top:${p.top}px;height:${Math.max(p.h, 6)}px;left:calc(${o.left}% + 1px);width:calc(${o.width}% - 2px);background:${o.color};color:${L.contrastText(o.color)};${o.style || ''}">${o.text || ''}</div>`;
+}
+function gridHTML(colFn, cls) {
+  const today = todayStr(), H = S.hEnd - S.hStart, total = H * PPH;
+  let h = `<div id="grid" class="tg ${cls || ''}" style="--pph:${PPH}px"><div class="tg-head"><div class="gh"></div>`;
+  for (let d = 0; d < 7; d++) {
+    const ds = L.addDays(S.week, d);
+    h += `<div class="gh ${ds === today ? 'today' : ''}">${DAYS[d]}<br><small>${fmtShort(ds)}</small></div>`;
+  }
+  h += `</div><div class="tg-body"><div class="tg-times" style="height:${total}px">`;
+  for (let i = 0; i < H; i++) h += `<span class="${i === 0 ? 'first' : ''}" style="top:${i * PPH}px">${L.fmtTime((S.hStart + i) * 60)}</span>`;
+  h += '</div>';
+  for (let d = 0; d < 7; d++) { const c = colFn(d) || {}; h += `<div class="tg-col ${c.cls || ''}" data-d="${d}" style="height:${total}px">${c.html || ''}</div>`; }
+  return h + '</div></div>';
+}
+function weekNavHTML() {
+  return `<div class="weeknav"><button data-act="wk" data-v="-1">&#8249;</button><strong>${fmtShort(S.week)} to ${fmtShort(L.addDays(S.week, 6))}</strong><button data-act="wk" data-v="1">&#8250;</button><button data-act="thisweek">Today</button></div>`;
+}
+
+// ---------- views ----------
+function profileHTML() {
+  const ps = S.db.people;
+  return `<div class="wrap"><h1>Who are you?</h1><p class="mute">Pick your name. No password. This device will remember it.</p>
+  <div class="plist">${ps.map(p => `<div class="prow"><button class="pick" data-act="pick" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button><button class="x" data-act="delperson" data-id="${p.id}">Remove</button></div>`).join('') || '<p class="mute">No one yet. Add the first name below.</p>'}</div>
+  <form data-submit="addperson" class="row"><input id="newname" placeholder="Add a name" maxlength="30" required style="flex:1"><button class="btn">Add</button></form>
+  ${S.me && person(S.me) ? '<p><button class="link" data-act="closeprofile">Back</button></p>' : ''}</div>`;
+}
+
+function editHTML() {
+  const b = S.db.blocks.find(x => x.id === S.editBlock); if (!b || !S.editForm) return '';
+  const f = S.editForm;
+  return `<form class="card" data-submit="saveblock" style="border-color:var(--accent)"><h3>Edit event</h3>
+    <div class="row2"><label>Type<select data-ef="type">${S.db.types.map(t => `<option value="${t.id}" ${f.type === t.id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
+    <label>Label<input data-ef="label" value="${esc(f.label)}" maxlength="40"></label></div>
+    <div class="row2"><label>Day<select data-ef="day">${DAYS.map((n, i) => `<option value="${i}" ${+f.day === i ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <div class="row2" style="gap:8px"><label>Start<input type="time" data-ef="start" value="${f.start}"></label><label>End<input type="time" data-ef="end" value="${f.end}"></label></div></div>
+    <label class="chk"><input type="checkbox" data-ef="private" ${f.private ? 'checked' : ''}> Private (others see only "Busy")</label>
+    <p class="hint" style="margin:0 0 6px">Weekly types change every week. Other types change only the week they belong to.</p>
+    ${S.editErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
+    <div class="row"><button class="btn">Save</button><button type="button" class="btn ghost" data-act="cancelblock">Cancel</button><button type="button" class="btn ghost" data-act="delblock" style="margin-left:auto;color:var(--danger)">Delete</button></div></form>`;
+}
+
+function mineHTML(me) {
+  const conf = L.isConfirmed(S.db.confirmations, me.id, S.week), t = curType();
+  const mine = L.blocksInWeek(S.db.blocks, me.id, S.week);
+  const lanes = {}; for (let d = 0; d < 7; d++) Object.assign(lanes, L.layoutLanes(mine.filter(b => b.day === d)));
+  const grid = gridHTML(d => ({
+    html: mine.filter(b => b.day === d).map(b => {
+      const ty = tOf(b.type), l = lanes[b.id];
+      return blkHTML(b, { color: ty.color, text: esc(b.label || ty.name), left: l.lane * 100 / l.lanes, width: 100 / l.lanes,
+        cls: (S.editBlock === b.id ? 'sel ' : '') + (b.private ? 'priv' : ''), title: L.blockDetail(b, ty, me.id) });
+    }).join('')
+  }), 'edit');
+  const chips = S.db.types.map(x => `<button type="button" class="chip ${t.id === x.id ? 'on' : ''}" style="--c:${x.color}" data-act="typesel" data-id="${x.id}"><span class="dot" style="background:${x.color}"></span>${esc(x.name)}<small>${x.repeat === 'weekly' ? 'weekly' : 'this week'}</small></button>`).join('');
+  const dayChips = DAYS.map((n, i) => `<button type="button" class="chip ${S.newDays.includes(i) ? 'on' : ''}" style="--c:var(--accent)" data-act="newday" data-v="${i}">${n}</button>`).join('');
+  const list = mine.slice().sort((a, b) => a.day - b.day || a.start - b.start).map(b => {
+    const ty = tOf(b.type);
+    return `<div class="erow"><span class="dot" style="background:${ty.color}"></span><span><b>${DAYS[b.day]}</b> ${L.fmtTime(b.start)} to ${L.fmtTime(b.end)} &middot; ${esc(b.label || ty.name)}<span class="badge">${b.weekDate == null ? 'weekly' : 'this week'}</span>${b.private ? '<span class="badge">private</span>' : ''}</span><button class="btn sm ghost" data-act="editblock" data-id="${b.id}">Edit</button></div>`;
+  }).join('') || '<p class="mute" style="margin:0">No events this week.</p>';
+  return `<div class="card"><div class="chips">${chips}</div>
+    <form data-submit="addevent">
+      <div class="row2"><label>Label (optional)<input data-sv="newLabel" value="${esc(S.newLabel)}" maxlength="40" placeholder="e.g. CS 101, Gym"></label>
+      <label class="chk" style="align-self:end;padding-bottom:10px"><input type="checkbox" data-sv="newPrivate" ${S.newPrivate ? 'checked' : ''}> Private (others see "Busy")</label></div>
+      <div class="chips">${dayChips}</div>
+      <div class="row"><label style="flex:1;min-width:110px">Start<input type="time" data-sv="timeStart" value="${S.timeStart}"></label><label style="flex:1;min-width:110px">End<input type="time" data-sv="timeEnd" value="${S.timeEnd}"></label><button class="btn" style="margin-bottom:8px">Add event</button></div>
+      ${S.addErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
+    </form>
+    <p class="hint">${t.repeat === 'weekly' ? `${esc(t.name)} events repeat every week.` : `${esc(t.name)} events apply to the week shown only.`} You can also drag on the grid (snaps to ${S.snap} min; change it in Settings). On touch screens, tap a start point, then an end point. Click an event to edit it. An end time of 12:00 AM means midnight.</p>
+    <div class="row" style="margin-top:8px"><button class="btn ghost" data-act="copy">Copy last week's events</button></div>
+    <div class="status ${conf ? 'ok' : 'warn'}"><span>${conf ? 'This week is confirmed' : 'This week is NOT confirmed. Others cannot count your time as free.'}</span>
+    <button class="btn sm ${conf ? 'ghost' : ''}" data-act="confirm">${conf ? 'Unconfirm' : 'Confirm my week'}</button></div></div>
+    ${editHTML()}${grid}<div class="card"><h3>Your events this week</h3>${list}</div>`;
+}
+
+function everyoneHTML() {
+  const ps = S.db.people, vis = ps.filter(p => S.visible[p.id] !== false), n = vis.length || 1;
+  const chips = ps.map(p => `<button class="chip ${S.visible[p.id] !== false ? 'on' : ''}" style="--c:${p.color}" data-act="vis" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : ' &#9888;'}</button>`).join('');
+  const grid = gridHTML(d => ({
+    html: vis.map((p, i) => {
+      const faded = L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : 'opacity:.45;';
+      return L.blocksInWeek(S.db.blocks, p.id, S.week).filter(b => b.day === d).map(b =>
+        blkHTML(b, { color: p.color, left: i * 100 / n, width: 100 / n, style: faded, cls: S.peek === b.id ? 'sel' : '',
+          title: p.name + ': ' + L.blockDetail(b, tOf(b.type), S.me) })).join('');
+    }).join('')
+  }), 'ev');
+  const pb = S.peek && S.db.blocks.find(b => b.id === S.peek), pp = pb && person(pb.personId);
+  const peek = pb && pp ? `<div class="card"><span class="dot" style="background:${pp.color}"></span><b>${esc(pp.name)}</b> &middot; ${DAYS[pb.day]} ${L.fmtTime(pb.start)} to ${L.fmtTime(pb.end)} &middot; ${esc(L.blockDetail(pb, tOf(pb.type), S.me))}</div>` : '';
+  return `<div class="card"><div class="chips">${chips}</div><div class="legend"><span style="--b:var(--mute)">&#9888; Faded = week not confirmed yet</span><span style="--b:var(--soft)">Each person has a fixed stripe. Click an event for details.</span></div></div>${peek}${grid}`;
+}
+
+function gapHTML() {
+  const ps = S.db.people, sel = selIds();
+  const res = L.freeWindows({ personIds: sel, blocks: S.db.blocks, confirmations: S.db.confirmations, weekDate: S.week, dayStart: hs(), dayEnd: he(), minLen: S.minLen });
+  const busy = L.busyByDay(S.db.blocks, sel, S.week);
+  const chips = ps.map(p => `<button class="chip ${sel.includes(p.id) ? 'on' : ''}" style="--c:${p.color}" data-act="gsel" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : ' &#9888;'}</button>`).join('');
+  const warn = res.unconfirmedIds.length ? `<div class="banner"><b>Not confirmed this week: ${names(res.unconfirmedIds)}.</b> Their time is not treated as free, so no shared windows are shown until they confirm (or you deselect them).</div>` : '';
+  const grid = gridHTML(d => {
+    if (!sel.length) return {};
+    if (res.blocked) return { cls: 'unk' };
+    return { html: busy[d].map(([a, b]) => boxHTML('busyw', a, b)).join('') + res.windows.filter(w => w.day === d).map(w => boxHTML('freew', w.start, w.end)).join('') };
+  });
+  let list;
+  if (!sel.length) list = '<p class="mute">Select at least one person.</p>';
+  else if (res.blocked) list = '';
+  else if (!res.windows.length) list = `<p class="mute">No window of ${L.fmtDur(S.minLen)} or more where everyone is free this week.</p>`;
+  else list = `<ul class="win">${res.windows.map(w => `<li>${fmtLong(L.addDays(S.week, w.day))}: ${L.fmtTime(w.start)} to ${L.fmtTime(w.end)} <span class="mute">(${L.fmtDur(w.end - w.start)})</span></li>`).join('')}</ul>`;
+  return `<div class="card"><div class="chips">${chips}</div>
+    <label style="max-width:220px">Minimum length<select data-change="minlen">${[15, 30, 45, 60, 90, 120, 180].map(m => `<option value="${m}" ${m === S.minLen ? 'selected' : ''}>${L.fmtDur(m)}</option>`).join('')}</select></label>
+    <p class="hint" style="margin:0 0 6px">Searching ${L.fmtTime(hs())} to ${L.fmtTime(he())} (change in Settings).</p>${list}</div>${warn}
+    <div class="legend"><span style="--b:var(--free)">Everyone free (at least ${L.fmtDur(S.minLen)})</span><span style="--b:var(--busy)">Someone busy</span><span style="--b:var(--unk2)">Hatched = unknown (unconfirmed)</span></div>${grid}`;
+}
+
+function settingsHTML() {
+  const hrs = (from, to, cur) => { let o = ''; for (let h = from; h <= to; h++) o += `<option value="${h}" ${h === cur ? 'selected' : ''}>${L.fmtTime(h * 60)}</option>`; return o; };
+  const rows = S.db.types.map(t => `<div class="trow"><input type="color" value="${t.color}" data-change="typeedit" data-tid="${t.id}" data-tf="color" aria-label="Color"><input type="text" value="${esc(t.name)}" maxlength="20" data-change="typeedit" data-tid="${t.id}" data-tf="name" aria-label="Name"><span class="mute" style="font-size:13px;white-space:nowrap">${t.repeat === 'weekly' ? 'weekly' : 'this week'}</span><button class="btn sm ghost" data-act="deltype" data-id="${t.id}">Delete</button></div>`).join('');
+  return `<div class="card"><h3>Event types</h3><p class="hint" style="margin:0 0 10px">Shared by everyone in the group. <b>Weekly</b> types repeat every week (classes, practice). <b>This week</b> types are entered per week (work shifts, one-offs). How a type repeats is fixed after creation, because changing it would change the meaning of existing events.</p>
+    ${rows}${S.typeErr ? `<div class="err">${esc(S.typeErr)}</div>` : ''}
+    <form data-submit="addtype" class="trow" style="margin-top:12px"><input type="color" value="${S.newType.color}" data-nt="color" aria-label="Color"><input type="text" placeholder="New type name" maxlength="20" value="${esc(S.newType.name)}" data-nt="name"><select data-nt="repeat" style="width:auto"><option value="weekly" ${S.newType.repeat === 'weekly' ? 'selected' : ''}>Weekly</option><option value="week" ${S.newType.repeat === 'week' ? 'selected' : ''}>This week</option></select><button class="btn">Add</button></form></div>
+    <div class="card"><h3>Grid (this device only)</h3><div class="row2"><label>Show from<select data-change="hstart">${hrs(0, 23, S.hStart)}</select></label><label>Show until<select data-change="hend">${hrs(S.hStart + 1, 24, S.hEnd)}</select></label></div>
+    <label style="max-width:240px">Drag snaps to<select data-change="snap">${[5, 10, 15, 20, 30, 60].map(m => `<option value="${m}" ${m === S.snap ? 'selected' : ''}>${m} min</option>`).join('')}</select></label>
+    <p class="hint" style="margin:0">The free-time finder and study suggestions only look inside the visible hours. Events outside them still exist and are listed under My week, but the grid hides them. Typed start and end times are never limited to the snap size.</p></div>`;
+}
+
+function studyHTML(t) {
+  const ps = S.db.people, now = new Date();
+  const ids = L.effectiveAssignees(t, ps);
+  const r = L.suggestStudySlots({ task: t, personIds: ids, blocks: S.db.blocks, confirmations: S.db.confirmations, today: todayStr(), nowMin: now.getHours() * 60 + now.getMinutes(), dayStart: hs(), dayEnd: he() });
+  let h = `<div class="study"><b>Suggested study slots</b> <span class="mute">(days before the due date, everyone free)</span>`;
+  if (r.status === 'no-assignees') h += '<p class="mute">No assignees.</p>';
+  else if (r.status === 'no-time-left') h += '<p class="mute">No days left before the due date.</p>';
+  else if (r.slots.length) h += `<ol>${r.slots.map((s, i) => `<li>${i === 0 ? '<b>Best:</b> ' : ''}${fmtLong(s.date)}, ${L.fmtTime(s.start)} to ${L.fmtTime(s.end)} <span class="mute">(${L.fmtDur(s.end - s.start)})</span></li>`).join('')}</ol>`;
+  else h += '<p class="mute">No common free window found.</p>';
+  if (r.skippedWeeks.length) h += `<p class="hint">Skipped (not confirmed): ${r.skippedWeeks.map(w => `week of ${fmtShort(w.weekDate)} (${names(w.unconfirmedIds)})`).join('; ')}</p>`;
+  if (r.truncated) h += '<p class="hint">Only the next 8 weeks were checked.</p>';
+  return h + '</div>';
+}
+
+function tasksHTML() {
+  const ps = S.db.people, today = todayStr(), f = S.form;
+  const ts = S.db.tasks.filter(t => S.filter === 'all' || t.category === S.filter)
+    .sort((a, b) => (a.status === 'done') - (b.status === 'done') || (a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0));
+  const filt = ['all', 'shared', 'group', 'personal'].map(c => `<button class="chip ${S.filter === c ? 'on' : ''}" style="--c:var(--ink)" data-act="filter" data-v="${c}">${c[0].toUpperCase() + c.slice(1)}</button>`).join('');
+  const rows = ts.map(t => {
+    const ids = L.effectiveAssignees(t, ps), diff = L.daysBetween(today, t.dueDate);
+    const due = t.status === 'done' ? '' : diff < 0 ? `<span class="over">${-diff}d overdue</span>` : diff === 0 ? '<b>due today</b>' : `in ${diff}d`;
+    const who = t.category === 'shared' ? 'Everyone' : names(ids);
+    return `<div class="task ${t.status === 'done' ? 'done' : ''}"><div><span class="tt"><b>${esc(t.title)}</b></span><span class="badge">${t.category}</span></div>
+      <div class="mute" style="font-size:13px">${ids.map(i => `<span class="dot" style="background:${person(i).color}"></span>`).join('')}${who} &middot; due ${fmtLong(t.dueDate)} ${due ? '(' + due + ')' : ''}</div>
+      <div class="row" style="margin-top:6px"><select data-change="status" data-id="${t.id}" style="width:auto">${[['todo', 'To do'], ['doing', 'In progress'], ['done', 'Done']].map(([v, l]) => `<option value="${v}" ${t.status === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      ${t.status !== 'done' ? `<button class="btn sm ghost" data-act="study" data-id="${t.id}">Study slots</button>` : ''}
+      <button class="btn sm ghost" data-act="edittask" data-id="${t.id}">Edit</button><button class="btn sm ghost" data-act="deltask" data-id="${t.id}">Delete</button></div>
+      ${S.studyFor === t.id ? studyHTML(t) : ''}</div>`;
+  }).join('') || '<p class="mute">No tasks here yet.</p>';
+  const shared = f.category === 'shared';
+  const chips = ps.map(p => `<button type="button" class="chip ${shared || f.assigneeIds.includes(p.id) ? 'on' : ''}" style="--c:${p.color}" ${shared ? 'disabled' : ''} data-act="assignee" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('');
+  const hint = { shared: 'everyone', group: 'pick 2 or more', personal: 'pick 1' }[f.category];
+  return `<form class="card" id="taskform" data-submit="savetask"><h3>${S.editing ? 'Edit task' : 'New task'}</h3>
+    <label>Title<input data-f="title" value="${esc(f.title)}" maxlength="80"></label>
+    <div class="row2"><label>Category<select data-change="cat">${['shared', 'group', 'personal'].map(c => `<option value="${c}" ${f.category === c ? 'selected' : ''}>${c[0].toUpperCase() + c.slice(1)}</option>`).join('')}</select></label>
+    <label>Due date<input type="date" data-f="dueDate" value="${f.dueDate}"></label></div>
+    <div>Assignees <small class="mute">(${hint})</small></div><div class="chips">${chips}</div>
+    ${S.formErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
+    <div class="row"><button class="btn">${S.editing ? 'Save' : 'Add task'}</button>${S.editing ? '<button type="button" class="btn ghost" data-act="canceledit">Cancel</button>' : ''}</div></form>
+    <div class="card"><div class="chips">${filt}</div>${rows}</div>`;
+}
+
+function render() {
+  const y = window.scrollY;
+  const me = person(S.me);
+  if (!me || S.managing) { $app.innerHTML = profileHTML(); return; }
+  const tabs = [['mine', 'My week'], ['all', 'Everyone'], ['gap', 'Free time'], ['tasks', 'Tasks'], ['settings', 'Settings']];
+  const body = { mine: () => mineHTML(me), all: everyoneHTML, gap: gapHTML, tasks: tasksHTML, settings: settingsHTML }[S.tab]();
+  const weekly = !['tasks', 'settings'].includes(S.tab);
+  $app.innerHTML = `<div class="wrap"><header><h1>Schedule Planner</h1><div><span class="dot" style="background:${me.color}"></span>${esc(me.name)} <button class="link" data-act="switch">Switch</button> <button class="link" data-act="theme" title="Theme">${THEMES[S.theme]}</button></div></header>
+    <nav>${tabs.map(([k, l]) => `<button class="${S.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</nav>
+    ${weekly ? weekNavHTML() : ''}${body}</div>`;
+  S.anchor = null;
+  window.scrollTo(0, y);
+}
+
+// ---------- editing interactions on the "My week" grid ----------
+let lastPT = 'mouse';
+const colOf = el => el && el.closest ? el.closest('#grid.edit .tg-col') : null;
+const minAt = (col, y) => { const r = col.getBoundingClientRect(); return Math.max(hs(), Math.min(he(), hs() + (y - r.top) / PPH * 60)); };
+function rangeOf(a, b) { // inclusive of the snap cell under each end, clamped to visible hours
+  let lo = L.snapFloor(Math.min(a, b), S.snap), hi = Math.min(he(), L.snapFloor(Math.max(a, b), S.snap) + S.snap);
+  lo = Math.min(lo, hi - S.snap);
+  return [Math.max(hs(), lo), hi];
+}
+function showBand(col, lo, hi) {
+  let el = col.querySelector('.band');
+  if (!el) { el = document.createElement('div'); el.className = 'band'; col.appendChild(el); }
+  const p = place(lo, hi); if (!p) return;
+  el.style.top = p.top + 'px'; el.style.height = p.h + 'px';
+}
+const clearBands = () => document.querySelectorAll('.band').forEach(b => b.remove());
+
+async function staleFor(weekDates) { // editing availability makes the affected weeks unconfirmed again
+  const wk = L.mondayOf(todayStr());
+  const ids = S.db.confirmations.filter(c => c.personId === S.me && weekDates.some(w => w == null ? c.weekDate >= wk : c.weekDate === w)).map(c => c.id);
+  if (ids.length) await Repo.remove('confirmations', ids);
+}
+function newBlock(day, start, end, t) {
+  return { id: uid(), personId: S.me, day, start, end, type: t.id, weekDate: L.weekDateFor(t, null, S.week), label: S.newLabel.trim(), private: !!S.newPrivate };
+}
+async function commitDrag(d, lo, hi) {
+  const t = curType(), b = newBlock(d, lo, hi, t);
+  if (L.validateBlock(b, S.db.types).length) { render(); return; }
+  S.newLabel = '';
+  await act(async () => { await Repo.upsert('blocks', b); await staleFor([b.weekDate]); });
+}
+document.addEventListener('pointerdown', e => {
+  lastPT = e.pointerType;
+  if (e.pointerType === 'touch' || e.button !== 0 || e.target.closest('.blk')) return;
+  const col = colOf(e.target); if (!col) return;
+  e.preventDefault();
+  const m = minAt(col, e.clientY);
+  S.drag = { col, d: +col.dataset.d, y0: e.clientY, a: m, b: m, moved: false };
+});
+document.addEventListener('pointermove', e => {
+  const dr = S.drag; if (!dr) return;
+  dr.b = minAt(dr.col, e.clientY);
+  if (Math.abs(e.clientY - dr.y0) >= 4) dr.moved = true;
+  if (dr.moved) { const [lo, hi] = rangeOf(dr.a, dr.b); showBand(dr.col, lo, hi); }
+});
+document.addEventListener('pointerup', () => {
+  const dr = S.drag; if (!dr) return;
+  S.drag = null; clearBands();
+  if (!dr.moved) return; // a plain click on empty space creates nothing
+  const [lo, hi] = rangeOf(dr.a, dr.b);
+  commitDrag(dr.d, lo, hi);
+});
+document.addEventListener('pointercancel', () => { S.drag = null; clearBands(); });
+
+// ---------- clicks, forms ----------
+function openEditor(id) {
+  const b = S.db.blocks.find(x => x.id === id); if (!b) return;
+  S.editBlock = id; S.editErr = [];
+  S.editForm = { type: b.type, label: b.label || '', day: b.day, start: L.fmtTimeInput(b.start), end: L.fmtTimeInput(b.end), private: !!b.private };
+  render();
+  const f = document.querySelector('form[data-submit=saveblock]'); if (f && f.scrollIntoView) f.scrollIntoView({ block: 'nearest' });
+}
+document.addEventListener('click', async e => {
+  const blk = e.target.closest('.blk');
+  if (blk) {
+    if (S.tab === 'mine') openEditor(blk.dataset.id);
+    else if (S.tab === 'all') { S.peek = S.peek === blk.dataset.id ? null : blk.dataset.id; render(); }
+    return;
+  }
+  const col = colOf(e.target);
+  if (col) { // touch: tap start, tap end
+    if (lastPT !== 'touch') return;
+    const d = +col.dataset.d, m = minAt(col, e.clientY);
+    if (S.anchor && S.anchor.d === d) { const a = S.anchor.a; S.anchor = null; clearBands(); const [lo, hi] = rangeOf(a, m); commitDrag(d, lo, hi); }
+    else { clearBands(); S.anchor = { d, a: m }; const [lo, hi] = rangeOf(m, m); showBand(col, lo, hi); }
+    return;
+  }
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id, v = el.dataset.v;
+  const go = () => { savePrefs(); render(); };
+  if (a === 'pick') { S.me = id; S.managing = false; resetTransient(); go(); }
+  else if (a === 'switch') { S.managing = true; render(); }
+  else if (a === 'closeprofile') { S.managing = false; render(); }
+  else if (a === 'theme') { S.theme = { auto: 'dark', dark: 'light', light: 'auto' }[S.theme]; applyTheme(); go(); }
+  else if (a === 'delperson') {
+    const p = person(id);
+    if (!confirm(`Remove ${p.name} and all of their schedule data?`)) return;
+    const c = L.cascadeRemovePerson(S.db, id);
+    await act(async () => {
+      await Repo.remove('blocks', c.blockIds); await Repo.remove('confirmations', c.confIds);
+      if (c.upsertTasks.length) await Repo.upsert('tasks', c.upsertTasks);
+      if (c.deleteTaskIds.length) await Repo.remove('tasks', c.deleteTaskIds);
+      await Repo.remove('people', id);
+    });
+    if (S.me === id) S.me = null;
+    if (S.gapSel) S.gapSel = S.gapSel.filter(x => x !== id);
+    go();
+  }
+  else if (a === 'tab') { S.tab = v; resetTransient(); go(); }
+  else if (a === 'wk') { S.week = L.addDays(S.week, 7 * +v); resetTransient(); render(); }
+  else if (a === 'thisweek') { S.week = L.mondayOf(todayStr()); resetTransient(); render(); }
+  else if (a === 'typesel') { S.typeSel = id; go(); }
+  else if (a === 'newday') { const d = +v; S.newDays = S.newDays.includes(d) ? S.newDays.filter(x => x !== d) : [...S.newDays, d].sort(); render(); }
+  else if (a === 'editblock') openEditor(id);
+  else if (a === 'cancelblock') { resetTransient(); render(); }
+  else if (a === 'delblock') {
+    const b = S.db.blocks.find(x => x.id === S.editBlock); if (!b) return;
+    resetTransient();
+    await act(async () => { await Repo.remove('blocks', b.id); await staleFor([b.weekDate]); });
+  }
+  else if (a === 'copy') {
+    const r = L.copyWeekBlocks(S.db.blocks, S.me, L.addDays(S.week, -7), S.week, uid);
+    if (!r.add.length) { alert('No this-week events found in the previous week. Weekly events repeat on their own.'); return; }
+    if (r.remove.length && !confirm(`Replace the ${r.remove.length} this-week event(s) already in this week with last week's ${r.add.length}?`)) return;
+    await act(async () => { if (r.remove.length) await Repo.remove('blocks', r.remove); await Repo.upsert('blocks', r.add); await staleFor([S.week]); });
+  }
+  else if (a === 'confirm') {
+    await act(async () => {
+      if (L.isConfirmed(S.db.confirmations, S.me, S.week)) await Repo.remove('confirmations', confId(S.me, S.week));
+      else await Repo.upsert('confirmations', { id: confId(S.me, S.week), personId: S.me, weekDate: S.week, confirmedAt: Date.now() });
+    });
+  }
+  else if (a === 'vis') { S.visible[id] = S.visible[id] === false; go(); }
+  else if (a === 'gsel') { const cur = selIds(); S.gapSel = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id]; go(); }
+  else if (a === 'deltype') {
+    const n = S.db.blocks.filter(b => b.type === id).length;
+    if (S.db.types.length <= 1) S.typeErr = 'Keep at least one type.';
+    else if (n) S.typeErr = `${n} event(s) still use this type. Change or delete those events first.`;
+    else { S.typeErr = ''; await act(() => Repo.remove('types', id)); return; }
+    render();
+  }
+  else if (a === 'filter') { S.filter = v; render(); }
+  else if (a === 'assignee') {
+    const f = S.form;
+    if (f.category === 'personal') f.assigneeIds = [id];
+    else f.assigneeIds = f.assigneeIds.includes(id) ? f.assigneeIds.filter(x => x !== id) : [...f.assigneeIds, id];
+    render();
+  }
+  else if (a === 'study') { S.studyFor = S.studyFor === id ? null : id; render(); }
+  else if (a === 'edittask') {
+    const t = S.db.tasks.find(x => x.id === id);
+    S.form = { title: t.title, category: t.category, assigneeIds: t.assigneeIds.slice(), dueDate: t.dueDate };
+    S.editing = id; S.formErr = []; render();
+    document.getElementById('taskform').scrollIntoView();
+  }
+  else if (a === 'canceledit') { S.editing = null; S.form = newForm(); S.formErr = []; render(); }
+  else if (a === 'deltask') { if (confirm('Delete this task?')) await act(() => Repo.remove('tasks', id)); }
+});
+
+document.addEventListener('submit', async e => {
+  e.preventDefault();
+  const k = e.target.dataset.submit;
+  if (k === 'addperson') {
+    const name = document.getElementById('newname').value.trim();
+    if (!name) return;
+    if (S.db.people.some(p => p.name.toLowerCase() === name.toLowerCase())) { alert('That name already exists.'); return; }
+    if (S.db.people.length >= PALETTE.length) { alert('Maximum of ' + PALETTE.length + ' people.'); return; }
+    const used = S.db.people.map(p => p.color);
+    await act(() => Repo.upsert('people', { id: uid(), name, color: PALETTE.find(c => !used.includes(c)) }));
+  } else if (k === 'addevent') {
+    const t = curType(), start = L.parseTimeInput(S.timeStart, false), end = L.parseTimeInput(S.timeEnd, true), errs = [];
+    if (!S.newDays.length) errs.push('Pick at least one day.');
+    if (start == null || end == null) errs.push('Enter valid start and end times.');
+    else errs.push(...L.validateBlock({ day: 0, start, end, type: t.id, label: S.newLabel }, S.db.types));
+    S.addErr = [...new Set(errs)];
+    if (S.addErr.length) { render(); return; }
+    const blocks = S.newDays.map(d => newBlock(d, start, end, t));
+    S.newLabel = ''; S.newDays = [];
+    await act(async () => { await Repo.upsert('blocks', blocks); await staleFor([blocks[0].weekDate]); });
+  } else if (k === 'saveblock') {
+    const old = S.db.blocks.find(b => b.id === S.editBlock); if (!old) return;
+    const f = S.editForm, t = tOf(f.type), start = L.parseTimeInput(f.start, false), end = L.parseTimeInput(f.end, true);
+    const nb = { ...old, type: t.id, label: f.label.trim(), day: +f.day, start, end, private: !!f.private, weekDate: L.weekDateFor(t, old.weekDate, S.week) };
+    S.editErr = start == null || end == null ? ['Enter valid start and end times.'] : L.validateBlock(nb, S.db.types);
+    if (S.editErr.length) { render(); return; }
+    resetTransient();
+    await act(async () => { await Repo.upsert('blocks', nb); await staleFor([old.weekDate, nb.weekDate]); });
+  } else if (k === 'addtype') {
+    const nt = { id: uid(), name: S.newType.name.trim(), color: S.newType.color, repeat: S.newType.repeat };
+    const errs = L.validateType(nt, S.db.types);
+    if (errs.length) { S.typeErr = errs[0]; render(); return; }
+    S.typeErr = '';
+    const used = S.db.types.map(t => t.color.toLowerCase()).concat(nt.color.toLowerCase());
+    S.newType = { name: '', color: TYPE_COLORS.find(c => !used.includes(c)) || TYPE_COLORS[0], repeat: nt.repeat };
+    await act(() => Repo.upsert('types', nt));
+  } else if (k === 'savetask') {
+    const f = S.form, old = S.db.tasks.find(t => t.id === S.editing);
+    const t = { id: S.editing || uid(), title: f.title.trim(), category: f.category,
+      assigneeIds: f.category === 'shared' ? S.db.people.map(p => p.id) : f.assigneeIds.slice(),
+      dueDate: f.dueDate, status: old ? old.status : 'todo' };
+    S.formErr = L.validateTask(t, S.db.people);
+    if (S.formErr.length) { render(); return; }
+    S.editing = null; S.form = newForm();
+    await act(() => Repo.upsert('tasks', t));
+  }
+});
+
+document.addEventListener('input', e => {
+  const d = e.target.dataset, val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+  if (d.f) S.form[d.f] = val;
+  else if (d.sv) S[d.sv] = val;
+  else if (d.ef && S.editForm) S.editForm[d.ef] = val;
+  else if (d.nt) S.newType[d.nt] = val;
+});
+document.addEventListener('change', async e => {
+  const k = e.target.dataset.change; if (!k) return;
+  const v = e.target.value;
+  if (k === 'cat') {
+    const prev = S.form.category;
+    S.form.category = v;
+    if (prev === 'shared') S.form.assigneeIds = [S.me];
+    else if (v === 'personal') S.form.assigneeIds = [S.form.assigneeIds[0] || S.me];
+    render();
+  } else if (k === 'minlen') { S.minLen = +v; savePrefs(); render(); }
+  else if (k === 'hstart') { S.hStart = +v; if (S.hEnd <= S.hStart) S.hEnd = Math.min(24, S.hStart + 1); savePrefs(); render(); }
+  else if (k === 'hend') { S.hEnd = +v; savePrefs(); render(); }
+  else if (k === 'snap') { S.snap = +v; savePrefs(); render(); }
+  else if (k === 'status') {
+    const t = S.db.tasks.find(x => x.id === e.target.dataset.id);
+    await act(() => Repo.upsert('tasks', { ...t, status: v }));
+  } else if (k === 'typeedit') {
+    const t = S.db.types.find(x => x.id === e.target.dataset.tid); if (!t) return;
+    const nt = { ...t, [e.target.dataset.tf]: e.target.dataset.tf === 'name' ? v.trim() : v };
+    const errs = L.validateType(nt, S.db.types);
+    if (errs.length) { S.typeErr = errs[0]; render(); return; }
+    S.typeErr = '';
+    await act(() => Repo.upsert('types', nt));
+  }
+});
+
+(async () => {
+  S.db = await Repo.loadAll();
+  if (!S.db.types.length) { await Repo.upsert('types', L.DEFAULT_TYPES.map(t => ({ ...t }))); S.db = await Repo.loadAll(); }
+  applyTheme(); render();
+  Repo.onExternalChange(async () => { S.db = await Repo.loadAll(); if (!S.drag) render(); });
+})();
+</script>
+</body>
+</html>

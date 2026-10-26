@@ -4,79 +4,182 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Shared Schedule Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2230;--mute:#667085;--line:#e3e6ec;--accent:#2f5bea;--warn:#b54708;--warnbg:#fff4e5;--ok:#1a7f45;--okbg:#e8f6ee;--head:#fafbfc;--soft:#eef0f4;--free:#9ddcb6;--busy:#dfe3ea;--unk1:#f4f5f7;--unk2:#e3e5ea;--study:#f4f7ff;--danger:#b42318;color-scheme:light}
-:root[data-theme=dark]{--bg:#0f131a;--card:#1a202b;--ink:#e8ecf3;--mute:#9aa4b5;--line:#2c3544;--accent:#6c8cff;--warn:#f5b361;--warnbg:#3a2a12;--ok:#5ad08a;--okbg:#12301f;--head:#161c26;--soft:#252d3a;--free:#2e7d52;--busy:#3a4455;--unk1:#1a202b;--unk2:#2a3240;--study:#1d2536;--danger:#f97066;color-scheme:dark}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f131a;--card:#1a202b;--ink:#e8ecf3;--mute:#9aa4b5;--line:#2c3544;--accent:#6c8cff;--warn:#f5b361;--warnbg:#3a2a12;--ok:#5ad08a;--okbg:#12301f;--head:#161c26;--soft:#252d3a;--free:#2e7d52;--busy:#3a4455;--unk1:#1a202b;--unk2:#2a3240;--study:#1d2536;--danger:#f97066;color-scheme:dark}}
-:root[data-theme=dark] .tg.ev .blk,:root[data-theme=dark] .dot{filter:brightness(1.35)}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tg.ev .blk,:root:not([data-theme=light]) .dot{filter:brightness(1.35)}}
+:root{
+  --bg:#f7f6f2;--card:#ffffff;--card-alt:#f3f2ed;--ink:#1c1f24;--ink-soft:#3f444c;--mute:#7a7f87;
+  --line:#e6e3dc;--line-soft:#efede8;--accent:#2f6f5e;--accent-soft:#e3efe9;--accent-ink:#ffffff;
+  --warn:#9a5b07;--warnbg:#fdf3e1;--warn-border:#f0cf94;--ok:#22704f;--okbg:#e5f4ec;--ok-border:#a9d8bf;
+  --head:#fbfaf7;--soft:#f1efe9;--free:rgba(47,145,104,.22);--free-border:#2f9168;--busy:rgba(90,95,105,.10);
+  --unk1:#f6f5f1;--unk2:#eeece6;--study:#f1f6f3;--danger:#b4352b;--danger-bg:#fcecea;
+  --shadow:0 1px 2px rgba(20,20,20,.04),0 4px 16px rgba(20,20,20,.04);
+  --font-serif:'Fraunces',Georgia,serif;--font-sans:'DM Sans',system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+:root[data-theme=dark]{
+  --bg:#121417;--card:#1a1d21;--card-alt:#20242a;--ink:#eceae6;--ink-soft:#c9c6c0;--mute:#8d9199;
+  --line:#2a2e35;--line-soft:#23272d;--accent:#6fc3a6;--accent-soft:#1d3029;--accent-ink:#0e1a16;
+  --warn:#f0bf68;--warnbg:#2a2113;--warn-border:#5a4520;--ok:#7ed3a8;--okbg:#14261d;--ok-border:#2f5a43;
+  --head:#171a1e;--soft:#23272d;--free:rgba(111,195,166,.22);--free-border:#6fc3a6;--busy:rgba(200,200,210,.07);
+  --unk1:#1a1d21;--unk2:#22262c;--study:#18241f;--danger:#f08a80;--danger-bg:#2c1716;
+  --shadow:0 1px 2px rgba(0,0,0,.3);color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#121417;--card:#1a1d21;--card-alt:#20242a;--ink:#eceae6;--ink-soft:#c9c6c0;--mute:#8d9199;
+  --line:#2a2e35;--line-soft:#23272d;--accent:#6fc3a6;--accent-soft:#1d3029;--accent-ink:#0e1a16;
+  --warn:#f0bf68;--warnbg:#2a2113;--warn-border:#5a4520;--ok:#7ed3a8;--okbg:#14261d;--ok-border:#2f5a43;
+  --head:#171a1e;--soft:#23272d;--free:rgba(111,195,166,.22);--free-border:#6fc3a6;--busy:rgba(200,200,210,.07);
+  --unk1:#1a1d21;--unk2:#22262c;--study:#18241f;--danger:#f08a80;--danger-bg:#2c1716;
+  --shadow:0 1px 2px rgba(0,0,0,.3);color-scheme:dark;}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.wrap{max-width:980px;margin:0 auto;padding:12px 16px 40px}
-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
-h1{font-size:20px;margin:0}h3{margin:0 0 8px}
-button{font:inherit;cursor:pointer}
-.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px}
-.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
-.btn.sm{padding:4px 10px;font-size:13px}
-.link{background:none;border:0;color:var(--accent);padding:4px}
-nav{display:flex;gap:4px;margin-bottom:10px;overflow-x:auto}
-nav button{flex:1;white-space:nowrap;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink)}
-nav button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font-sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 24px 64px}
+h1,h2,h3{font-family:var(--font-serif);font-weight:600;letter-spacing:-.01em;margin:0;color:var(--ink)}
+h1{font-size:22px}h3{font-size:18px}
+button{font:inherit;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Header */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--font-serif);font-weight:700;font-size:16px}
+nav{display:inline-flex;gap:2px}
+nav button{background:transparent;border:0;border-radius:999px;padding:8px 14px;color:var(--mute);font-weight:500;font-size:14px;white-space:nowrap}
+nav button:hover{color:var(--ink);background:var(--card-alt)}
+nav button.on{color:var(--ink);background:var(--card);box-shadow:var(--shadow);font-weight:600}
+.user-actions{display:flex;gap:6px;align-items:center}
+
+/* Buttons */
+.btn{background:var(--accent);color:var(--accent-ink);border:1px solid transparent;border-radius:10px;padding:9px 16px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--ink-soft);border-color:var(--line)}
+.btn.ghost:hover{background:var(--card-alt);color:var(--ink)}
+.btn.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok-border)}
+.btn.warn{background:var(--warnbg);color:var(--warn);border-color:var(--warn-border)}
+.btn.sm{padding:6px 12px;font-size:13px;border-radius:8px}
+.btn.icon{width:34px;height:34px;padding:0}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--mute)}
+.btn.quiet:hover{color:var(--ink);background:var(--card-alt)}
+.btn.danger{color:var(--danger)}
+.link{background:transparent;border:1px solid transparent;border-radius:999px;color:var(--ink-soft);padding:6px 12px;font-size:13px;font-weight:500;display:inline-flex;align-items:center}
+.link:hover{background:var(--card-alt);color:var(--ink)}
+
+/* Toolbars */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.wk-title{font-family:var(--font-serif);font-size:19px;font-weight:600;margin-left:8px}
+.subbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.subbar .lbl{font-size:13px;color:var(--mute);margin-right:4px}
+.tip{font-size:13px;color:var(--mute)}
+.seg{display:inline-flex;background:var(--card-alt);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--mute);padding:6px 14px;font-size:13px;font-weight:500;border-radius:8px}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-weight:600}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mute,.hint{color:var(--mute)}.hint{font-size:13px;margin:8px 0 0}
-input,select{font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;width:100%;background:var(--card);color:var(--ink)}
-input[type=checkbox]{width:auto}
-input[type=color]{width:44px;height:36px;padding:2px;flex:none}
-label{display:block;font-size:13px;color:var(--mute);margin-bottom:8px}
-label.chk{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--ink)}
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
-.plist{display:flex;flex-direction:column;gap:8px;margin:12px 0}
-.prow{display:flex;gap:8px}.pick{flex:1;text-align:left;padding:12px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;font-size:16px}
-.x{background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--danger);padding:0 12px}
-.weeknav{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
-.weeknav button{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 12px}
-.status{margin-top:10px;padding:8px 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.status.ok{background:var(--okbg);color:var(--ok)}.status.warn{background:var(--warnbg);color:var(--warn)}
-.banner{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 12px;margin-bottom:10px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.chip{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 12px}
-.chip.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
-.chip:disabled{opacity:.7;cursor:default}
-.chip small{opacity:.65;margin-left:4px}
-.legend{display:flex;gap:12px;font-size:12px;color:var(--mute);margin-bottom:8px;flex-wrap:wrap}
-.legend span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-2px;background:var(--b)}
-/* time grid: columns are positioned by minute, not fixed cells */
-.tg{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;user-select:none;-webkit-user-select:none;margin-bottom:10px}
-.tg-head,.tg-body{display:grid;grid-template-columns:42px repeat(7,minmax(0,1fr))}
-.gh{padding:6px 2px;text-align:center;font-size:12px;border-bottom:1px solid var(--line);background:var(--head)}
-.gh small{color:var(--mute);font-size:10px}.gh.today{color:var(--accent);font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mute,.hint{color:var(--mute)}
+.hint{font-size:13px;margin:6px 0 0}
+
+/* Inputs */
+input,select{font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;width:100%;background:var(--card);color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;padding:0}
+input[type=color]{width:38px;height:38px;padding:3px;flex:none;cursor:pointer}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:14px}
+label>input,label>select{margin-top:6px;font-weight:400}
+label.chk{display:flex;gap:10px;align-items:center;font-weight:400;color:var(--ink);cursor:pointer}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle;flex:none}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink-soft);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500;display:inline-flex;align-items:center}
+.chip:hover:not(:disabled){border-color:var(--mute);color:var(--ink)}
+.chip.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card));color:var(--ink)}
+.chip:disabled{opacity:.6;cursor:default}
+.chip small{opacity:.65;margin-left:6px;font-size:11px}
+
+.banner{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn-border);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+/* Grid */
+.tg{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;user-select:none;-webkit-user-select:none;margin-bottom:16px;box-shadow:var(--shadow)}
+.tg-head,.tg-body{display:grid;grid-template-columns:54px repeat(7,minmax(0,1fr))}
+.gh{padding:10px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);background:var(--card)}
+.gh small{display:block;font-size:15px;color:var(--ink);text-transform:none;letter-spacing:0;font-weight:600;margin-top:2px}
+.gh.today small{display:table;margin:2px auto 0;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:1px 9px}
+.gh.today{color:var(--accent)}
 .tg-times{position:relative}
-.tg-times span{position:absolute;right:4px;font-size:10px;color:var(--mute);transform:translateY(-50%)}
-.tg-times span.first{transform:none;top:2px}
-.tg-col{position:relative;border-left:1px solid var(--line);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(var(--soft) 1px,transparent 1px);background-size:100% var(--pph),100% var(--pph);background-position:0 0,0 calc(var(--pph)/2)}
+.tg-times span{position:absolute;right:8px;font-size:11px;color:var(--mute);transform:translateY(-50%)}
+.tg-times span.first{transform:none;top:3px}
+.tg-col{position:relative;border-left:1px solid var(--line-soft);background-image:linear-gradient(var(--line-soft) 1px,transparent 1px);background-size:100% var(--pph)}
 .tg.edit .tg-col{cursor:crosshair}
-.tg-col.unk{background-image:repeating-linear-gradient(45deg,var(--unk1),var(--unk1) 4px,var(--unk2) 4px,var(--unk2) 8px);background-size:auto;background-position:0 0}
-.blk{position:absolute;border-radius:4px;font-size:11px;line-height:1.15;padding:1px 3px;overflow:hidden;border:1px solid rgba(0,0,0,.28);cursor:pointer;word-break:break-word}
-.blk.priv{border-style:dashed}
-.blk.sel{outline:2px solid var(--ink);outline-offset:1px;z-index:2}
-.band{position:absolute;left:0;right:0;background:rgba(47,91,234,.3);outline:2px solid var(--accent);outline-offset:-2px;pointer-events:none;z-index:3}
-.freew{position:absolute;left:2px;right:2px;background:var(--free);border-radius:4px;pointer-events:none}
+.tg.edit .tg-col:hover{background-color:color-mix(in srgb,var(--accent) 3%,transparent)}
+.tg-col.unk{background-image:repeating-linear-gradient(-45deg,var(--unk1),var(--unk1) 6px,var(--unk2) 6px,var(--unk2) 12px);background-size:auto}
+.blk{position:absolute;border-radius:7px;font-size:12px;font-weight:600;line-height:1.25;padding:4px 6px;overflow:hidden;cursor:pointer;word-break:break-word;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.blk:hover{filter:brightness(1.06);z-index:2}
+.blk.priv{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.14) 0 4px,transparent 4px 8px)}
+.blk.sel{outline:2px solid var(--ink);outline-offset:1px;z-index:3}
+.band{position:absolute;left:2px;right:2px;background:color-mix(in srgb,var(--accent) 22%,transparent);border:1.5px dashed var(--accent);border-radius:7px;pointer-events:none;z-index:4}
+.freew{position:absolute;left:3px;right:3px;background:var(--free);border:1px solid var(--free-border);border-radius:7px;pointer-events:none}
 .busyw{position:absolute;left:0;right:0;background:var(--busy);pointer-events:none}
-ul.win{margin:8px 0 0;padding-left:18px}
-.task{border-top:1px solid var(--line);padding:10px 0}.task:first-child{border-top:0}
+
+/* Modals */
+.modal-bg{position:fixed;inset:0;background:rgba(15,18,22,.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:100;animation:fade .15s ease}
+.modal{background:var(--card);border-radius:18px;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:pop .18s ease}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-foot{display:flex;gap:8px;margin-top:20px;align-items:center}
+.modal-foot .sp{margin-left:auto}
+@keyframes fade{from{opacity:0}}@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.98)}}
+details.more{margin:4px 0 0}
+details.more summary{cursor:pointer;color:var(--mute);font-size:13px;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more[open] summary{margin-bottom:12px}
+
+/* Profile */
+.plist{display:flex;flex-direction:column;gap:8px;margin:20px 0}
+.prow{display:flex;gap:6px;align-items:stretch}
+.pick{flex:1;text-align:left;padding:13px 16px;background:var(--card-alt);color:var(--ink);border:1px solid transparent;border-radius:12px;font-size:15px;font-weight:600;display:flex;align-items:center}
+.pick:hover{border-color:var(--accent);background:var(--card)}
+.x{background:transparent;border:0;border-radius:10px;color:var(--mute);padding:0 12px;font-size:13px;opacity:.6}
+.prow:hover .x{opacity:1}
+.x:hover{color:var(--danger);background:var(--danger-bg)}
+
+/* Tasks */
+.task{border-top:1px solid var(--line-soft);padding:14px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.task:first-child{border-top:0;padding-top:0}
+.task:last-child{padding-bottom:0}
 .task.done .tt{text-decoration:line-through;color:var(--mute)}
-.badge{font-size:11px;border-radius:999px;padding:1px 8px;background:var(--soft);margin-left:6px}
+.task .acts{display:flex;gap:4px;align-items:center;opacity:.55;transition:opacity .15s}
+.task:hover .acts,.task:focus-within .acts{opacity:1}
+.task select{width:auto;padding:5px 10px;font-size:13px;border-radius:999px}
+.badge{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--soft);color:var(--mute);margin-left:8px;text-transform:capitalize}
 .over{color:var(--danger);font-weight:600}
-.study{background:var(--study);border-radius:8px;padding:8px 12px;margin-top:8px}
-.err{color:var(--danger);font-size:13px;margin:6px 0}
-.erow{display:flex;align-items:center;gap:6px;padding:6px 0;border-top:1px solid var(--line)}
-.erow:first-of-type{border-top:0}.erow>span:nth-child(2){flex:1}
+.empty{text-align:center;padding:28px 0;color:var(--mute)}
+.study{width:100%;background:var(--study);border-radius:12px;padding:12px 16px;margin-top:4px;font-size:14px}
+.study ol{margin:6px 0 0;padding-left:20px}
+.err{color:var(--danger);background:var(--danger-bg);border-radius:10px;padding:8px 12px;font-size:13px;margin:8px 0}
 .trow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .trow input[type=text]{flex:1;min-width:0}
-@media(max-width:520px){.row2{grid-template-columns:1fr}.tg-head,.tg-body{grid-template-columns:34px repeat(7,minmax(0,1fr))}.blk{font-size:10px;padding:0 1px}}
+.win-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.win-chip{background:var(--okbg);color:var(--ok);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mute);align-items:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-2px}
+
+@media (max-width:720px){
+  .wrap{padding:14px 12px 90px}
+  .brand{gap:12px}
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--card);border-top:1px solid var(--line);padding:8px;justify-content:space-around;gap:0}
+  nav button{font-size:13px;padding:8px 10px}
+  .row2{grid-template-columns:1fr;gap:8px}
+  .tg-head,.tg-body{grid-template-columns:38px repeat(7,minmax(0,1fr))}
+  .gh{font-size:10px}.gh small{font-size:13px}
+  .blk{font-size:10px;padding:2px 3px}
+  .tip{display:none}
+  .task .acts{opacity:1}
+}
 </style>
 </head>
 <body>
@@ -91,7 +194,7 @@ const Logic = (() => {
     { id: 'class', name: 'Class', color: '#3b6fd4', repeat: 'weekly' },
     { id: 'work', name: 'Work', color: '#e07b00', repeat: 'week' }
   ];
-  const SLOT = 30; // only used for scoring study slots
+  const SLOT = 30;
   const pad = n => String(n).padStart(2, '0');
 
   function fmtTime(min) {
@@ -102,7 +205,6 @@ const Logic = (() => {
     const h = Math.floor(min / 60), m = min % 60;
     return (h ? h + 'h' : '') + (h && m ? ' ' : '') + (m ? m + 'm' : '');
   }
-  // 'HH:MM' (from <input type=time>) <-> minutes. An END of 00:00 means midnight (1440).
   function parseTimeInput(str, isEnd) {
     const m = /^(\d{1,2}):(\d{2})$/.exec(String(str || '').trim());
     if (!m) return null;
@@ -114,14 +216,12 @@ const Logic = (() => {
   function fmtTimeInput(min) { return min >= 1440 ? '00:00' : pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
   function snapFloor(min, snap) { return Math.floor(min / snap) * snap; }
 
-  // Dates are 'YYYY-MM-DD' strings; all math in UTC to avoid DST/timezone bugs.
   function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); }
   function fmtDate(dt) { return dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate()); }
   function addDays(s, n) { const d = parseDate(s); d.setUTCDate(d.getUTCDate() + n); return fmtDate(d); }
   function mondayOf(s) { const d = parseDate(s); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return fmtDate(d); }
   function daysBetween(a, b) { return Math.round((parseDate(b) - parseDate(a)) / 86400000); }
 
-  // Intervals are [start,end] in minutes.
   function normalize(iv) {
     const a = iv.filter(x => x[1] > x[0]).map(x => [x[0], x[1]]).sort((p, q) => p[0] - q[0] || p[1] - q[1]);
     const out = [];
@@ -146,8 +246,6 @@ const Logic = (() => {
     return out;
   }
 
-  // weekDate null/undefined = repeats every week. Otherwise the block only counts in that week (a Monday).
-  // Recurrence lives on the block itself, so this never needs the type table.
   function blocksInWeek(blocks, personId, weekDate) {
     return blocks.filter(b => b.personId === personId && (b.weekDate == null || b.weekDate === weekDate));
   }
@@ -160,8 +258,6 @@ const Logic = (() => {
     return days.map(normalize);
   }
 
-  // Windows where ALL personIds are free. If anyone is unconfirmed for that week,
-  // their time is unknown, so NO windows are returned (never treated as free).
   function freeWindows({ personIds, blocks, confirmations, weekDate, dayStart = DEFAULT_HOURS.start * 60, dayEnd = DEFAULT_HOURS.end * 60, minLen = 60 }) {
     const unconfirmedIds = personIds.filter(id => !isConfirmed(confirmations, id, weekDate));
     if (unconfirmedIds.length) return { windows: [], unconfirmedIds, blocked: true };
@@ -173,7 +269,6 @@ const Logic = (() => {
     return { windows, unconfirmedIds: [], blocked: false };
   }
 
-  // ---- Blocks and types ----
   function validateBlock(b, types) {
     const errors = [];
     if (!Number.isInteger(b.day) || b.day < 0 || b.day > 6) errors.push('Pick a valid day.');
@@ -192,17 +287,14 @@ const Logic = (() => {
     if (!['weekly', 'week'].includes(t.repeat)) errors.push('Pick how the type repeats.');
     return errors;
   }
-  // A weekly type stores weekDate null. A this-week type keeps its week, or takes the week being viewed.
   function weekDateFor(type, existingWeekDate, viewWeek) {
     return type.repeat === 'weekly' ? null : (existingWeekDate || viewWeek);
   }
-  // What another person is allowed to see about a block.
   function blockDetail(b, type, viewerId) {
     if (b.private && b.personId !== viewerId) return 'Busy';
     return type.name + (b.label ? ': ' + b.label : '') + (b.private ? ' (private)' : '');
   }
-  // Pick black or white text, whichever has more contrast on the given #rrggbb.
-  const DARK_TEXT = '#1c2230';
+  const DARK_TEXT = '#0f172a';
   function lum(hex) {
     const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
@@ -212,7 +304,6 @@ const Logic = (() => {
     const L = lum(hex), white = 1.05 / (L + 0.05), dark = (L + 0.05) / (lum(DARK_TEXT) + 0.05);
     return dark > white ? DARK_TEXT : '#fff';
   }
-  // Side-by-side lanes for overlapping blocks within one day. Returns { id: {lane, lanes} }.
   function layoutLanes(blocks) {
     const items = blocks.slice().sort((a, b) => a.start - b.start || b.end - a.end);
     const out = {}; let cluster = [], clusterEnd = -1, laneEnds = [];
@@ -226,7 +317,6 @@ const Logic = (() => {
     flush();
     return out;
   }
-  // Copy every week-specific block of a person from one week to another (weekly blocks need no copying).
   function copyWeekBlocks(blocks, personId, fromWeek, toWeek, genId) {
     const mine = w => blocks.filter(b => b.personId === personId && b.weekDate === w);
     return {
@@ -235,7 +325,6 @@ const Logic = (() => {
     };
   }
 
-  // ---- Tasks ----
   const CATEGORIES = ['shared', 'group', 'personal'];
   function effectiveAssignees(task, people) {
     return task.category === 'shared' ? people.map(p => p.id) : task.assigneeIds.filter(id => people.some(p => p.id === id));
@@ -266,10 +355,7 @@ const Logic = (() => {
     };
   }
 
-  // ---- Study slot suggestions ----
   function todWeight(m) { const h = m / 60; return (h >= 10 && h < 20) ? 3 : (((h >= 8 && h < 10) || (h >= 20 && h < 22)) ? 2 : 1); }
-  // Best sub-window of length len inside [start,end]. Candidate starts: the window's own start
-  // (e.g. 11:40 right after a class) plus every :00/:30 inside it.
   function bestSub(start, end, len) {
     const starts = [start];
     for (let s = Math.ceil(start / SLOT) * SLOT; s + len <= end; s += SLOT) if (s > start) starts.push(s);
@@ -281,7 +367,6 @@ const Logic = (() => {
     }
     return best;
   }
-  // Slots fall on days strictly BEFORE dueDate, only in weeks where every assignee confirmed.
   function suggestStudySlots({ task, personIds, blocks, confirmations, today, nowMin = 0, minLen = 60, maxLen = 120, maxResults = 6, maxWeeks = 8, maxPerDay = 2, dayStart = DEFAULT_HOURS.start * 60, dayEnd = DEFAULT_HOURS.end * 60 }) {
     const out = { slots: [], skippedWeeks: [], truncated: false, status: 'ok' };
     if (!personIds.length) { out.status = 'no-assignees'; return out; }
@@ -325,13 +410,7 @@ const Logic = (() => {
 if (typeof module !== 'undefined') module.exports = Logic;
 </script>
 
-<!-- ============ STORAGE ADAPTER ============
-Swap this object for Supabase/Firebase later. Contract (all async):
-  loadAll() -> {people,blocks,confirmations,tasks,types}
-  upsert(table, rowOrRows)   rows are plain objects with a string `id`
-  remove(table, idOrIds)
-  onExternalChange(cb)       call cb() when other clients change data (realtime)
-Tables map 1:1 to database tables with the same field names. `blocks.type` holds a `types.id`. -->
+<!-- ============ STORAGE ADAPTER ============ -->
 <script id="storage">
 const Repo = (() => {
   const KEY = 'sp.db.v1';
@@ -361,7 +440,7 @@ const Repo = (() => {
 <!-- ============ UI ============ -->
 <script id="ui">
 const L = Logic, DAYS = Logic.DAYS;
-const PPH = 44; // pixels per hour in the time grid
+const PPH = 44;
 const PALETTE = ['#0072B2', '#E69F00', '#CC79A7', '#882255', '#56B4E9', '#332288', '#DDCC77', '#999999'];
 const TYPE_COLORS = ['#3b6fd4', '#e07b00', '#2a9d8f', '#8e5bd1', '#d1495b', '#6a994e', '#c9a227', '#5c6b7a'];
 const $app = document.getElementById('app');
@@ -379,20 +458,27 @@ const applyTheme = () => { if (S.theme === 'auto') document.documentElement.remo
 const THEMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
 const newForm = () => ({ title: '', category: 'shared', assigneeIds: [], dueDate: '' });
 const P = loadPrefs();
+const initTab = (P.tab === 'all' || P.tab === 'gap') ? 'group' : (P.tab || 'mine');
+
 const S = {
   db: { people: [], blocks: [], confirmations: [], tasks: [], types: [] },
-  me: P.me || null, tab: P.tab || 'mine', week: L.mondayOf(todayStr()),
+  me: P.me || null,
+  tab: initTab,
+  groupMode: P.tab === 'gap' ? 'free' : (P.groupMode || 'overlay'),
+  week: L.mondayOf(todayStr()),
   visible: P.visible || {}, gapSel: P.gapSel || null, minLen: P.minLen || 60,
   hStart: Number.isInteger(P.hStart) ? P.hStart : 7, hEnd: Number.isInteger(P.hEnd) ? P.hEnd : 23, snap: P.snap || 15,
   typeSel: P.typeSel || 'class', theme: P.theme || 'auto',
+  showAddModal: false, showTaskModal: false,
   newLabel: '', newPrivate: false, newDays: [], timeStart: '09:00', timeEnd: '10:00', addErr: [],
   editBlock: null, editForm: null, editErr: [], peek: null,
   newType: { name: '', color: TYPE_COLORS[2], repeat: 'weekly' }, typeErr: '',
   filter: 'all', form: newForm(), editing: null, formErr: [], studyFor: null,
   anchor: null, drag: null, managing: false
 };
+
 function savePrefs() {
-  try { localStorage.setItem(PK, JSON.stringify({ me: S.me, tab: S.tab, visible: S.visible, gapSel: S.gapSel, minLen: S.minLen, hStart: S.hStart, hEnd: S.hEnd, snap: S.snap, typeSel: S.typeSel, theme: S.theme })); } catch (e) {}
+  try { localStorage.setItem(PK, JSON.stringify({ me: S.me, tab: S.tab, groupMode: S.groupMode, visible: S.visible, gapSel: S.gapSel, minLen: S.minLen, hStart: S.hStart, hEnd: S.hEnd, snap: S.snap, typeSel: S.typeSel, theme: S.theme })); } catch (e) {}
 }
 async function act(fn) { await fn(); S.db = await Repo.loadAll(); render(); }
 const person = id => S.db.people.find(p => p.id === id);
@@ -402,7 +488,7 @@ const FALLBACK_T = { id: '?', name: 'Unknown', color: '#888888', repeat: 'week' 
 const tOf = id => S.db.types.find(t => t.id === id) || FALLBACK_T;
 const curType = () => S.db.types.find(t => t.id === S.typeSel) || S.db.types[0];
 const hs = () => S.hStart * 60, he = () => S.hEnd * 60;
-const resetTransient = () => { S.editBlock = null; S.editForm = null; S.editErr = []; S.peek = null; S.anchor = null; };
+const resetTransient = () => { S.editBlock = null; S.editForm = null; S.editErr = []; S.peek = null; S.anchor = null; S.showAddModal = false; S.showTaskModal = false; };
 
 // ---------- time grid ----------
 function place(s, e) {
@@ -422,7 +508,7 @@ function gridHTML(colFn, cls) {
   let h = `<div id="grid" class="tg ${cls || ''}" style="--pph:${PPH}px"><div class="tg-head"><div class="gh"></div>`;
   for (let d = 0; d < 7; d++) {
     const ds = L.addDays(S.week, d);
-    h += `<div class="gh ${ds === today ? 'today' : ''}">${DAYS[d]}<br><small>${fmtShort(ds)}</small></div>`;
+    h += `<div class="gh ${ds === today ? 'today' : ''}">${DAYS[d]}<small>${fmtShort(ds)}</small></div>`;
   }
   h += `</div><div class="tg-body"><div class="tg-times" style="height:${total}px">`;
   for (let i = 0; i < H; i++) h += `<span class="${i === 0 ? 'first' : ''}" style="top:${i * PPH}px">${L.fmtTime((S.hStart + i) * 60)}</span>`;
@@ -430,31 +516,84 @@ function gridHTML(colFn, cls) {
   for (let d = 0; d < 7; d++) { const c = colFn(d) || {}; h += `<div class="tg-col ${c.cls || ''}" data-d="${d}" style="height:${total}px">${c.html || ''}</div>`; }
   return h + '</div></div>';
 }
-function weekNavHTML() {
-  return `<div class="weeknav"><button data-act="wk" data-v="-1">&#8249;</button><strong>${fmtShort(S.week)} to ${fmtShort(L.addDays(S.week, 6))}</strong><button data-act="wk" data-v="1">&#8250;</button><button data-act="thisweek">Today</button></div>`;
+
+// ---------- modals ----------
+function addModalHTML() {
+  if (!S.showAddModal) return '';
+  const t = curType();
+  const chips = S.db.types.map(x => `<button type="button" class="chip ${t.id === x.id ? 'on' : ''}" style="--c:${x.color}" data-act="typesel" data-id="${x.id}"><span class="dot" style="background:${x.color}"></span>${esc(x.name)}<small>${x.repeat === 'weekly' ? 'weekly' : '1-week'}</small></button>`).join('');
+  const dayChips = DAYS.map((n, i) => `<button type="button" class="chip ${S.newDays.includes(i) ? 'on' : ''}" style="--c:var(--accent)" data-act="newday" data-v="${i}">${n}</button>`).join('');
+  return `<div class="modal-bg" data-act="closemodal"><div class="modal">
+    <div class="modal-head"><h3>New event</h3><button type="button" class="btn icon quiet" data-act="closemodal" aria-label="Close">&#10005;</button></div>
+    <form data-submit="addevent">
+      <label>Type</label><div class="chips" style="margin:-6px 0 16px">${chips}</div>
+      <label>Days</label><div class="chips" style="margin:-6px 0 16px">${dayChips}</div>
+      <div class="row2"><label>Starts<input type="time" data-sv="timeStart" value="${S.timeStart}"></label><label>Ends<input type="time" data-sv="timeEnd" value="${S.timeEnd}"></label></div>
+      <details class="more" ${S.newLabel || S.newPrivate ? 'open' : ''}><summary>+ Name &amp; privacy (optional)</summary>
+        <label>Name<input data-sv="newLabel" value="${esc(S.newLabel)}" maxlength="40" placeholder="e.g. CS 101, Shift"></label>
+        <label class="chk"><input type="checkbox" data-sv="newPrivate" ${S.newPrivate ? 'checked' : ''}> Private &mdash; others only see "Busy"</label>
+      </details>
+      ${S.addErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
+      <div class="modal-foot"><button type="button" class="btn ghost sp" data-act="closemodal">Cancel</button><button class="btn">Add</button></div>
+    </form>
+  </div></div>`;
+}
+
+function editModalHTML() {
+  const b = S.db.blocks.find(x => x.id === S.editBlock); if (!b || !S.editForm) return '';
+  const f = S.editForm;
+  return `<div class="modal-bg" data-act="cancelblock"><div class="modal">
+    <div class="modal-head"><h3>Edit event</h3><button type="button" class="btn icon quiet" data-act="cancelblock" aria-label="Close">&#10005;</button></div>
+    <form data-submit="saveblock">
+      <div class="row2"><label>Type<select data-ef="type">${S.db.types.map(t => `<option value="${t.id}" ${f.type === t.id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
+      <label>Label<input data-ef="label" value="${esc(f.label)}" maxlength="40"></label></div>
+      <div class="row2"><label>Day<select data-ef="day">${DAYS.map((n, i) => `<option value="${i}" ${+f.day === i ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+      <div class="row2" style="gap:8px"><label>Start<input type="time" data-ef="start" value="${f.start}"></label><label>End<input type="time" data-ef="end" value="${f.end}"></label></div></div>
+      <label class="chk"><input type="checkbox" data-ef="private" ${f.private ? 'checked' : ''}> Private (others see only "Busy")</label>
+      ${S.editErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
+      <div class="modal-foot"><button type="button" class="btn quiet danger" data-act="delblock">Delete</button><button type="button" class="btn ghost sp" data-act="cancelblock">Cancel</button><button class="btn">Save</button></div>
+    </form>
+  </div></div>`;
+}
+
+function taskModalHTML() {
+  if (!S.showTaskModal && !S.editing) return '';
+  const ps = S.db.people, f = S.form, shared = f.category === 'shared';
+  const chips = ps.map(p => `<button type="button" class="chip ${shared || f.assigneeIds.includes(p.id) ? 'on' : ''}" style="--c:${p.color}" ${shared ? 'disabled' : ''} data-act="assignee" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('');
+  const hint = { shared: 'everyone', group: 'pick 2+', personal: 'pick 1' }[f.category];
+  return `<div class="modal-bg" data-act="canceledit"><div class="modal">
+    <div class="modal-head"><h3>${S.editing ? 'Edit task' : 'New task'}</h3><button type="button" class="btn icon quiet" data-act="canceledit" aria-label="Close">&#10005;</button></div>
+    <form data-submit="savetask">
+      <label>Title<input data-f="title" value="${esc(f.title)}" maxlength="80" placeholder="e.g. Midterm Group Project"></label>
+      <div class="row2"><label>Category<select data-change="cat">${['shared', 'group', 'personal'].map(c => `<option value="${c}" ${f.category === c ? 'selected' : ''}>${c[0].toUpperCase() + c.slice(1)}</option>`).join('')}</select></label>
+      <label>Due Date<input type="date" data-f="dueDate" value="${f.dueDate}"></label></div>
+      <label>Who <span class="mute" style="font-weight:400">&middot; ${hint}</span></label>
+      <div class="chips" style="margin:-6px 0 12px">${chips}</div>
+      ${S.formErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
+      <div class="modal-foot"><button type="button" class="btn ghost sp" data-act="canceledit">Cancel</button><button class="btn">${S.editing ? 'Save' : 'Create task'}</button></div>
+    </form>
+  </div></div>`;
 }
 
 // ---------- views ----------
 function profileHTML() {
   const ps = S.db.people;
-  return `<div class="wrap"><h1>Who are you?</h1><p class="mute">Pick your name. No password. This device will remember it.</p>
-  <div class="plist">${ps.map(p => `<div class="prow"><button class="pick" data-act="pick" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button><button class="x" data-act="delperson" data-id="${p.id}">Remove</button></div>`).join('') || '<p class="mute">No one yet. Add the first name below.</p>'}</div>
-  <form data-submit="addperson" class="row"><input id="newname" placeholder="Add a name" maxlength="30" required style="flex:1"><button class="btn">Add</button></form>
-  ${S.me && person(S.me) ? '<p><button class="link" data-act="closeprofile">Back</button></p>' : ''}</div>`;
+  return `<div class="wrap" style="max-width:440px;margin-top:8vh"><div class="card" style="padding:28px"><div class="logo-mark" style="margin-bottom:16px">S</div><h1>Who's planning?</h1><p class="mute" style="margin:6px 0 0">Pick your name to continue.</p>
+  <div class="plist">${ps.map(p => `<div class="prow"><button class="pick" data-act="pick" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button><button class="x" data-act="delperson" data-id="${p.id}">Remove</button></div>`).join('') || '<p class="mute">No profiles yet. Add the first person below.</p>'}</div>
+  <form data-submit="addperson" class="row"><input id="newname" placeholder="New name" maxlength="30" required style="flex:1;width:auto"><button class="btn">Add</button></form>
+  ${S.me && person(S.me) ? '<p style="margin:14px 0 0"><button class="link" data-act="closeprofile">&#8592; Back to schedule</button></p>' : ''}</div></div>`;
 }
 
-function editHTML() {
-  const b = S.db.blocks.find(x => x.id === S.editBlock); if (!b || !S.editForm) return '';
-  const f = S.editForm;
-  return `<form class="card" data-submit="saveblock" style="border-color:var(--accent)"><h3>Edit event</h3>
-    <div class="row2"><label>Type<select data-ef="type">${S.db.types.map(t => `<option value="${t.id}" ${f.type === t.id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
-    <label>Label<input data-ef="label" value="${esc(f.label)}" maxlength="40"></label></div>
-    <div class="row2"><label>Day<select data-ef="day">${DAYS.map((n, i) => `<option value="${i}" ${+f.day === i ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
-    <div class="row2" style="gap:8px"><label>Start<input type="time" data-ef="start" value="${f.start}"></label><label>End<input type="time" data-ef="end" value="${f.end}"></label></div></div>
-    <label class="chk"><input type="checkbox" data-ef="private" ${f.private ? 'checked' : ''}> Private (others see only "Busy")</label>
-    <p class="hint" style="margin:0 0 6px">Weekly types change every week. Other types change only the week they belong to.</p>
-    ${S.editErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
-    <div class="row"><button class="btn">Save</button><button type="button" class="btn ghost" data-act="cancelblock">Cancel</button><button type="button" class="btn ghost" data-act="delblock" style="margin-left:auto;color:var(--danger)">Delete</button></div></form>`;
+function weekControlsHTML(rightHTML) {
+  return `<div class="toolbar">
+    <div class="row" style="gap:4px">
+      <button class="btn sm ghost" data-act="thisweek">Today</button>
+      <button class="btn icon quiet" data-act="wk" data-v="-1" aria-label="Previous week">&#8249;</button>
+      <button class="btn icon quiet" data-act="wk" data-v="1" aria-label="Next week">&#8250;</button>
+      <span class="wk-title">${fmtShort(S.week)} &ndash; ${fmtShort(L.addDays(S.week, 6))}</span>
+    </div>
+    <div class="row">${rightHTML || ''}</div>
+  </div>`;
 }
 
 function mineHTML(me) {
@@ -468,138 +607,152 @@ function mineHTML(me) {
         cls: (S.editBlock === b.id ? 'sel ' : '') + (b.private ? 'priv' : ''), title: L.blockDetail(b, ty, me.id) });
     }).join('')
   }), 'edit');
-  const chips = S.db.types.map(x => `<button type="button" class="chip ${t.id === x.id ? 'on' : ''}" style="--c:${x.color}" data-act="typesel" data-id="${x.id}"><span class="dot" style="background:${x.color}"></span>${esc(x.name)}<small>${x.repeat === 'weekly' ? 'weekly' : 'this week'}</small></button>`).join('');
-  const dayChips = DAYS.map((n, i) => `<button type="button" class="chip ${S.newDays.includes(i) ? 'on' : ''}" style="--c:var(--accent)" data-act="newday" data-v="${i}">${n}</button>`).join('');
-  const list = mine.slice().sort((a, b) => a.day - b.day || a.start - b.start).map(b => {
-    const ty = tOf(b.type);
-    return `<div class="erow"><span class="dot" style="background:${ty.color}"></span><span><b>${DAYS[b.day]}</b> ${L.fmtTime(b.start)} to ${L.fmtTime(b.end)} &middot; ${esc(b.label || ty.name)}<span class="badge">${b.weekDate == null ? 'weekly' : 'this week'}</span>${b.private ? '<span class="badge">private</span>' : ''}</span><button class="btn sm ghost" data-act="editblock" data-id="${b.id}">Edit</button></div>`;
-  }).join('') || '<p class="mute" style="margin:0">No events this week.</p>';
-  return `<div class="card"><div class="chips">${chips}</div>
-    <form data-submit="addevent">
-      <div class="row2"><label>Label (optional)<input data-sv="newLabel" value="${esc(S.newLabel)}" maxlength="40" placeholder="e.g. CS 101, Gym"></label>
-      <label class="chk" style="align-self:end;padding-bottom:10px"><input type="checkbox" data-sv="newPrivate" ${S.newPrivate ? 'checked' : ''}> Private (others see "Busy")</label></div>
-      <div class="chips">${dayChips}</div>
-      <div class="row"><label style="flex:1;min-width:110px">Start<input type="time" data-sv="timeStart" value="${S.timeStart}"></label><label style="flex:1;min-width:110px">End<input type="time" data-sv="timeEnd" value="${S.timeEnd}"></label><button class="btn" style="margin-bottom:8px">Add event</button></div>
-      ${S.addErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
-    </form>
-    <p class="hint">${t.repeat === 'weekly' ? `${esc(t.name)} events repeat every week.` : `${esc(t.name)} events apply to the week shown only.`} You can also drag on the grid (snaps to ${S.snap} min; change it in Settings). On touch screens, tap a start point, then an end point. Click an event to edit it. An end time of 12:00 AM means midnight.</p>
-    <div class="row" style="margin-top:8px"><button class="btn ghost" data-act="copy">Copy last week's events</button></div>
-    <div class="status ${conf ? 'ok' : 'warn'}"><span>${conf ? 'This week is confirmed' : 'This week is NOT confirmed. Others cannot count your time as free.'}</span>
-    <button class="btn sm ${conf ? 'ghost' : ''}" data-act="confirm">${conf ? 'Unconfirm' : 'Confirm my week'}</button></div></div>
-    ${editHTML()}${grid}<div class="card"><h3>Your events this week</h3>${list}</div>`;
+
+  const topActions = `
+    <button class="btn sm quiet" data-act="copy" title="Copy one-off events from last week">Copy last week</button>
+    <button class="btn sm ${conf ? 'ok' : 'warn'}" data-act="confirm" title="${conf ? 'Click to unconfirm' : 'Let others use your schedule to find free time'}">${conf ? '&#10003; Confirmed' : 'Confirm week'}</button>
+    <button class="btn sm" data-act="openadd">+ Add event</button>
+  `;
+
+  const chips = S.db.types.map(x => `<button type="button" class="chip ${t.id === x.id ? 'on' : ''}" style="--c:${x.color}" data-act="typesel" data-id="${x.id}"><span class="dot" style="background:${x.color}"></span>${esc(x.name)}</button>`).join('');
+
+  return `${weekControlsHTML(topActions)}
+    <div class="subbar">
+      <div class="row"><span class="lbl">Drawing:</span><div class="chips">${chips}</div></div>
+      <span class="tip">Drag on the calendar to add &middot; click to edit</span>
+    </div>
+    ${grid}${addModalHTML()}${editModalHTML()}`;
 }
 
-function everyoneHTML() {
-  const ps = S.db.people, vis = ps.filter(p => S.visible[p.id] !== false), n = vis.length || 1;
-  const chips = ps.map(p => `<button class="chip ${S.visible[p.id] !== false ? 'on' : ''}" style="--c:${p.color}" data-act="vis" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : ' &#9888;'}</button>`).join('');
-  const grid = gridHTML(d => ({
-    html: vis.map((p, i) => {
-      const faded = L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : 'opacity:.45;';
-      return L.blocksInWeek(S.db.blocks, p.id, S.week).filter(b => b.day === d).map(b =>
-        blkHTML(b, { color: p.color, left: i * 100 / n, width: 100 / n, style: faded, cls: S.peek === b.id ? 'sel' : '',
-          title: p.name + ': ' + L.blockDetail(b, tOf(b.type), S.me) })).join('');
-    }).join('')
-  }), 'ev');
-  const pb = S.peek && S.db.blocks.find(b => b.id === S.peek), pp = pb && person(pb.personId);
-  const peek = pb && pp ? `<div class="card"><span class="dot" style="background:${pp.color}"></span><b>${esc(pp.name)}</b> &middot; ${DAYS[pb.day]} ${L.fmtTime(pb.start)} to ${L.fmtTime(pb.end)} &middot; ${esc(L.blockDetail(pb, tOf(pb.type), S.me))}</div>` : '';
-  return `<div class="card"><div class="chips">${chips}</div><div class="legend"><span style="--b:var(--mute)">&#9888; Faded = week not confirmed yet</span><span style="--b:var(--soft)">Each person has a fixed stripe. Click an event for details.</span></div></div>${peek}${grid}`;
-}
+function groupHTML() {
+  const ps = S.db.people;
+  const modeToggle = `<div class="seg">
+    <button class="${S.groupMode === 'overlay' ? 'on' : ''}" data-act="gmode" data-v="overlay">Everyone</button>
+    <button class="${S.groupMode === 'free' ? 'on' : ''}" data-act="gmode" data-v="free">Free time</button>
+  </div>`;
 
-function gapHTML() {
-  const ps = S.db.people, sel = selIds();
-  const res = L.freeWindows({ personIds: sel, blocks: S.db.blocks, confirmations: S.db.confirmations, weekDate: S.week, dayStart: hs(), dayEnd: he(), minLen: S.minLen });
-  const busy = L.busyByDay(S.db.blocks, sel, S.week);
-  const chips = ps.map(p => `<button class="chip ${sel.includes(p.id) ? 'on' : ''}" style="--c:${p.color}" data-act="gsel" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : ' &#9888;'}</button>`).join('');
-  const warn = res.unconfirmedIds.length ? `<div class="banner"><b>Not confirmed this week: ${names(res.unconfirmedIds)}.</b> Their time is not treated as free, so no shared windows are shown until they confirm (or you deselect them).</div>` : '';
-  const grid = gridHTML(d => {
-    if (!sel.length) return {};
-    if (res.blocked) return { cls: 'unk' };
-    return { html: busy[d].map(([a, b]) => boxHTML('busyw', a, b)).join('') + res.windows.filter(w => w.day === d).map(w => boxHTML('freew', w.start, w.end)).join('') };
-  });
-  let list;
-  if (!sel.length) list = '<p class="mute">Select at least one person.</p>';
-  else if (res.blocked) list = '';
-  else if (!res.windows.length) list = `<p class="mute">No window of ${L.fmtDur(S.minLen)} or more where everyone is free this week.</p>`;
-  else list = `<ul class="win">${res.windows.map(w => `<li>${fmtLong(L.addDays(S.week, w.day))}: ${L.fmtTime(w.start)} to ${L.fmtTime(w.end)} <span class="mute">(${L.fmtDur(w.end - w.start)})</span></li>`).join('')}</ul>`;
-  return `<div class="card"><div class="chips">${chips}</div>
-    <label style="max-width:220px">Minimum length<select data-change="minlen">${[15, 30, 45, 60, 90, 120, 180].map(m => `<option value="${m}" ${m === S.minLen ? 'selected' : ''}>${L.fmtDur(m)}</option>`).join('')}</select></label>
-    <p class="hint" style="margin:0 0 6px">Searching ${L.fmtTime(hs())} to ${L.fmtTime(he())} (change in Settings).</p>${list}</div>${warn}
-    <div class="legend"><span style="--b:var(--free)">Everyone free (at least ${L.fmtDur(S.minLen)})</span><span style="--b:var(--busy)">Someone busy</span><span style="--b:var(--unk2)">Hatched = unknown (unconfirmed)</span></div>${grid}`;
-}
-
-function settingsHTML() {
-  const hrs = (from, to, cur) => { let o = ''; for (let h = from; h <= to; h++) o += `<option value="${h}" ${h === cur ? 'selected' : ''}>${L.fmtTime(h * 60)}</option>`; return o; };
-  const rows = S.db.types.map(t => `<div class="trow"><input type="color" value="${t.color}" data-change="typeedit" data-tid="${t.id}" data-tf="color" aria-label="Color"><input type="text" value="${esc(t.name)}" maxlength="20" data-change="typeedit" data-tid="${t.id}" data-tf="name" aria-label="Name"><span class="mute" style="font-size:13px;white-space:nowrap">${t.repeat === 'weekly' ? 'weekly' : 'this week'}</span><button class="btn sm ghost" data-act="deltype" data-id="${t.id}">Delete</button></div>`).join('');
-  return `<div class="card"><h3>Event types</h3><p class="hint" style="margin:0 0 10px">Shared by everyone in the group. <b>Weekly</b> types repeat every week (classes, practice). <b>This week</b> types are entered per week (work shifts, one-offs). How a type repeats is fixed after creation, because changing it would change the meaning of existing events.</p>
-    ${rows}${S.typeErr ? `<div class="err">${esc(S.typeErr)}</div>` : ''}
-    <form data-submit="addtype" class="trow" style="margin-top:12px"><input type="color" value="${S.newType.color}" data-nt="color" aria-label="Color"><input type="text" placeholder="New type name" maxlength="20" value="${esc(S.newType.name)}" data-nt="name"><select data-nt="repeat" style="width:auto"><option value="weekly" ${S.newType.repeat === 'weekly' ? 'selected' : ''}>Weekly</option><option value="week" ${S.newType.repeat === 'week' ? 'selected' : ''}>This week</option></select><button class="btn">Add</button></form></div>
-    <div class="card"><h3>Grid (this device only)</h3><div class="row2"><label>Show from<select data-change="hstart">${hrs(0, 23, S.hStart)}</select></label><label>Show until<select data-change="hend">${hrs(S.hStart + 1, 24, S.hEnd)}</select></label></div>
-    <label style="max-width:240px">Drag snaps to<select data-change="snap">${[5, 10, 15, 20, 30, 60].map(m => `<option value="${m}" ${m === S.snap ? 'selected' : ''}>${m} min</option>`).join('')}</select></label>
-    <p class="hint" style="margin:0">The free-time finder and study suggestions only look inside the visible hours. Events outside them still exist and are listed under My week, but the grid hides them. Typed start and end times are never limited to the snap size.</p></div>`;
+  if (S.groupMode === 'overlay') {
+    const vis = ps.filter(p => S.visible[p.id] !== false), n = vis.length || 1;
+    const chips = ps.map(p => `<button class="chip ${S.visible[p.id] !== false ? 'on' : ''}" style="--c:${p.color}" data-act="vis" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : ' &#9888;'}</button>`).join('');
+    const grid = gridHTML(d => ({
+      html: vis.map((p, i) => {
+        const faded = L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : 'opacity:.45;';
+        return L.blocksInWeek(S.db.blocks, p.id, S.week).filter(b => b.day === d).map(b =>
+          blkHTML(b, { color: p.color, left: i * 100 / n, width: 100 / n, style: faded, cls: S.peek === b.id ? 'sel' : '',
+            title: p.name + ': ' + L.blockDetail(b, tOf(b.type), S.me) })).join('');
+      }).join('')
+    }), 'ev');
+    const pb = S.peek && S.db.blocks.find(b => b.id === S.peek), pp = pb && person(pb.personId);
+    const peek = pb && pp ? `<div class="banner" style="background:var(--card);color:var(--ink);border-color:${pp.color}"><span><span class="dot" style="background:${pp.color}"></span><b>${esc(pp.name)}</b> &middot; ${DAYS[pb.day]} ${L.fmtTime(pb.start)} &ndash; ${L.fmtTime(pb.end)} &middot; ${esc(L.blockDetail(pb, tOf(pb.type), S.me))}</span><button class="btn sm ghost" data-act="closepeek">&#10005;</button></div>` : '';
+    return `${weekControlsHTML(modeToggle)}
+      <div class="subbar"><div class="chips">${chips}</div><span class="tip">Faded &#9888; = not confirmed yet</span></div>
+      ${peek}${grid}`;
+  } else {
+    const sel = selIds();
+    const res = L.freeWindows({ personIds: sel, blocks: S.db.blocks, confirmations: S.db.confirmations, weekDate: S.week, dayStart: hs(), dayEnd: he(), minLen: S.minLen });
+    const busy = L.busyByDay(S.db.blocks, sel, S.week);
+    const chips = ps.map(p => `<button class="chip ${sel.includes(p.id) ? 'on' : ''}" style="--c:${p.color}" data-act="gsel" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}${L.isConfirmed(S.db.confirmations, p.id, S.week) ? '' : ' &#9888;'}</button>`).join('');
+    const minSelect = `<div class="row" style="gap:6px"><span class="lbl">At least</span><select data-change="minlen" style="width:auto;padding:5px 10px;font-size:13px;border-radius:999px">${[15, 30, 45, 60, 90, 120, 180].map(m => `<option value="${m}" ${m === S.minLen ? 'selected' : ''}>${L.fmtDur(m)}</option>`).join('')}</select></div>`;
+    const warn = res.unconfirmedIds.length ? `<div class="banner"><span>Waiting on <b>${names(res.unconfirmedIds)}</b> to confirm. Deselect them to see free time for the rest.</span></div>` : '';
+    const grid = gridHTML(d => {
+      if (!sel.length) return {};
+      if (res.blocked) return { cls: 'unk' };
+      return { html: busy[d].map(([a, b]) => boxHTML('busyw', a, b)).join('') + res.windows.filter(w => w.day === d).map(w => boxHTML('freew', w.start, w.end)).join('') };
+    });
+    const winSummary = (!res.blocked && res.windows.length)
+      ? `<div class="card"><b>${res.windows.length} time${res.windows.length > 1 ? 's' : ''} everyone is free</b><div class="win-chips">${res.windows.map(w => `<span class="win-chip">${DAYS[w.day]} ${L.fmtTime(w.start)}&ndash;${L.fmtTime(w.end)} (${L.fmtDur(w.end - w.start)})</span>`).join('')}</div></div>`
+      : (!res.blocked && sel.length ? '<div class="card empty">No shared free time this week. Try a shorter length.</div>' : '');
+    return `${weekControlsHTML(modeToggle)}
+      <div class="subbar"><div class="chips">${chips}</div>${minSelect}</div>
+      ${warn}${winSummary}${grid}`;
+  }
 }
 
 function studyHTML(t) {
   const ps = S.db.people, now = new Date();
   const ids = L.effectiveAssignees(t, ps);
   const r = L.suggestStudySlots({ task: t, personIds: ids, blocks: S.db.blocks, confirmations: S.db.confirmations, today: todayStr(), nowMin: now.getHours() * 60 + now.getMinutes(), dayStart: hs(), dayEnd: he() });
-  let h = `<div class="study"><b>Suggested study slots</b> <span class="mute">(days before the due date, everyone free)</span>`;
-  if (r.status === 'no-assignees') h += '<p class="mute">No assignees.</p>';
-  else if (r.status === 'no-time-left') h += '<p class="mute">No days left before the due date.</p>';
-  else if (r.slots.length) h += `<ol>${r.slots.map((s, i) => `<li>${i === 0 ? '<b>Best:</b> ' : ''}${fmtLong(s.date)}, ${L.fmtTime(s.start)} to ${L.fmtTime(s.end)} <span class="mute">(${L.fmtDur(s.end - s.start)})</span></li>`).join('')}</ol>`;
-  else h += '<p class="mute">No common free window found.</p>';
-  if (r.skippedWeeks.length) h += `<p class="hint">Skipped (not confirmed): ${r.skippedWeeks.map(w => `week of ${fmtShort(w.weekDate)} (${names(w.unconfirmedIds)})`).join('; ')}</p>`;
-  if (r.truncated) h += '<p class="hint">Only the next 8 weeks were checked.</p>';
+  let h = `<div class="study"><b>Times everyone is free before it's due</b>`;
+  if (r.status === 'no-assignees') h += '<p class="mute" style="margin:4px 0 0">No assignees.</p>';
+  else if (r.status === 'no-time-left') h += '<p class="mute" style="margin:4px 0 0">No days remaining before due date.</p>';
+  else if (r.slots.length) h += `<ol>${r.slots.map((s, i) => `<li>${i === 0 ? '<b>Best:</b> ' : ''}${fmtLong(s.date)}, ${L.fmtTime(s.start)} &ndash; ${L.fmtTime(s.end)} <span class="mute">(${L.fmtDur(s.end - s.start)})</span></li>`).join('')}</ol>`;
+  else h += '<p class="mute" style="margin:4px 0 0">No common free window found.</p>';
+  if (r.skippedWeeks.length) h += `<p class="hint">Skipped unconfirmed weeks: ${r.skippedWeeks.map(w => `week of ${fmtShort(w.weekDate)} (${names(w.unconfirmedIds)})`).join('; ')}</p>`;
   return h + '</div>';
 }
 
 function tasksHTML() {
-  const ps = S.db.people, today = todayStr(), f = S.form;
+  const ps = S.db.people, today = todayStr();
   const ts = S.db.tasks.filter(t => S.filter === 'all' || t.category === S.filter)
     .sort((a, b) => (a.status === 'done') - (b.status === 'done') || (a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0));
-  const filt = ['all', 'shared', 'group', 'personal'].map(c => `<button class="chip ${S.filter === c ? 'on' : ''}" style="--c:var(--ink)" data-act="filter" data-v="${c}">${c[0].toUpperCase() + c.slice(1)}</button>`).join('');
+  const filt = ['all', 'shared', 'group', 'personal'].map(c => `<button class="${S.filter === c ? 'on' : ''}" data-act="filter" data-v="${c}">${c[0].toUpperCase() + c.slice(1)}</button>`).join('');
   const rows = ts.map(t => {
     const ids = L.effectiveAssignees(t, ps), diff = L.daysBetween(today, t.dueDate);
     const due = t.status === 'done' ? '' : diff < 0 ? `<span class="over">${-diff}d overdue</span>` : diff === 0 ? '<b>due today</b>' : `in ${diff}d`;
     const who = t.category === 'shared' ? 'Everyone' : names(ids);
-    return `<div class="task ${t.status === 'done' ? 'done' : ''}"><div><span class="tt"><b>${esc(t.title)}</b></span><span class="badge">${t.category}</span></div>
-      <div class="mute" style="font-size:13px">${ids.map(i => `<span class="dot" style="background:${person(i).color}"></span>`).join('')}${who} &middot; due ${fmtLong(t.dueDate)} ${due ? '(' + due + ')' : ''}</div>
-      <div class="row" style="margin-top:6px"><select data-change="status" data-id="${t.id}" style="width:auto">${[['todo', 'To do'], ['doing', 'In progress'], ['done', 'Done']].map(([v, l]) => `<option value="${v}" ${t.status === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
-      ${t.status !== 'done' ? `<button class="btn sm ghost" data-act="study" data-id="${t.id}">Study slots</button>` : ''}
-      <button class="btn sm ghost" data-act="edittask" data-id="${t.id}">Edit</button><button class="btn sm ghost" data-act="deltask" data-id="${t.id}">Delete</button></div>
-      ${S.studyFor === t.id ? studyHTML(t) : ''}</div>`;
-  }).join('') || '<p class="mute">No tasks here yet.</p>';
-  const shared = f.category === 'shared';
-  const chips = ps.map(p => `<button type="button" class="chip ${shared || f.assigneeIds.includes(p.id) ? 'on' : ''}" style="--c:${p.color}" ${shared ? 'disabled' : ''} data-act="assignee" data-id="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</button>`).join('');
-  const hint = { shared: 'everyone', group: 'pick 2 or more', personal: 'pick 1' }[f.category];
-  return `<form class="card" id="taskform" data-submit="savetask"><h3>${S.editing ? 'Edit task' : 'New task'}</h3>
-    <label>Title<input data-f="title" value="${esc(f.title)}" maxlength="80"></label>
-    <div class="row2"><label>Category<select data-change="cat">${['shared', 'group', 'personal'].map(c => `<option value="${c}" ${f.category === c ? 'selected' : ''}>${c[0].toUpperCase() + c.slice(1)}</option>`).join('')}</select></label>
-    <label>Due date<input type="date" data-f="dueDate" value="${f.dueDate}"></label></div>
-    <div>Assignees <small class="mute">(${hint})</small></div><div class="chips">${chips}</div>
-    ${S.formErr.map(e => `<div class="err">${esc(e)}</div>`).join('')}
-    <div class="row"><button class="btn">${S.editing ? 'Save' : 'Add task'}</button>${S.editing ? '<button type="button" class="btn ghost" data-act="canceledit">Cancel</button>' : ''}</div></form>
-    <div class="card"><div class="chips">${filt}</div>${rows}</div>`;
+    return `<div class="task ${t.status === 'done' ? 'done' : ''}">
+      <div>
+        <div><span class="tt"><b>${esc(t.title)}</b></span><span class="badge">${t.category}</span></div>
+        <div class="mute" style="font-size:13px;margin-top:4px">${ids.map(i => `<span class="dot" style="background:${person(i).color}"></span>`).join('')}${who} &middot; Due ${fmtLong(t.dueDate)} ${due ? '(' + due + ')' : ''}</div>
+      </div>
+      <div class="acts">
+        <select data-change="status" data-id="${t.id}" aria-label="Status">${[['todo', 'To do'], ['doing', 'In progress'], ['done', 'Done']].map(([v, l]) => `<option value="${v}" ${t.status === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        ${t.status !== 'done' ? `<button class="btn sm ghost" data-act="study" data-id="${t.id}">Find time</button>` : ''}
+        <button class="btn sm quiet" data-act="edittask" data-id="${t.id}">Edit</button>
+        <button class="btn sm quiet danger" data-act="deltask" data-id="${t.id}" aria-label="Delete task">&#10005;</button>
+      </div>
+      ${S.studyFor === t.id ? studyHTML(t) : ''}
+    </div>`;
+  }).join('') || `<div class="empty">Nothing here yet.<br><button class="btn sm" style="margin-top:12px" data-act="opentask">+ New task</button></div>`;
+
+  return `<div class="toolbar"><div class="seg">${filt}</div><button class="btn sm" data-act="opentask">+ New task</button></div>
+    <div class="card">${rows}</div>${taskModalHTML()}`;
+}
+
+function settingsHTML() {
+  const hrs = (from, to, cur) => { let o = ''; for (let h = from; h <= to; h++) o += `<option value="${h}" ${h === cur ? 'selected' : ''}>${L.fmtTime(h * 60)}</option>`; return o; };
+  const rows = S.db.types.map(t => `<div class="trow"><input type="color" value="${t.color}" data-change="typeedit" data-tid="${t.id}" data-tf="color" aria-label="Color"><input type="text" value="${esc(t.name)}" maxlength="20" data-change="typeedit" data-tid="${t.id}" data-tf="name" aria-label="Name"><span class="badge" style="margin:0">${t.repeat === 'weekly' ? 'weekly' : '1-week'}</span><button class="btn sm ghost" data-act="deltype" data-id="${t.id}">Delete</button></div>`).join('');
+  return `<div class="row2" style="align-items:start">
+    <div class="card"><h3>Event types</h3><p class="hint" style="margin:4px 0 16px"><b>Weekly</b> types repeat every week. <b>1-week</b> types apply only to the week entered.</p>
+      ${rows}${S.typeErr ? `<div class="err">${esc(S.typeErr)}</div>` : ''}
+      <form data-submit="addtype" class="trow" style="margin-top:14px"><input type="color" value="${S.newType.color}" data-nt="color" aria-label="Color"><input type="text" placeholder="Add a type" maxlength="20" value="${esc(S.newType.name)}" data-nt="name"><select data-nt="repeat" style="width:auto"><option value="weekly" ${S.newType.repeat === 'weekly' ? 'selected' : ''}>Weekly</option><option value="week" ${S.newType.repeat === 'week' ? 'selected' : ''}>1-week</option></select><button class="btn">Add</button></form>
+    </div>
+    <div class="card"><h3 style="margin-bottom:16px">Calendar</h3>
+      <div class="row2"><label>Day starts<select data-change="hstart">${hrs(0, 23, S.hStart)}</select></label><label>Day ends<select data-change="hend">${hrs(S.hStart + 1, 24, S.hEnd)}</select></label></div>
+      <label>Snap to<select data-change="snap">${[5, 10, 15, 20, 30, 60].map(m => `<option value="${m}" ${m === S.snap ? 'selected' : ''}>${m} minutes</option>`).join('')}</select></label>
+      <p class="hint">Free-time searches and study suggestions scan within your visible grid hours.</p>
+    </div>
+  </div>`;
 }
 
 function render() {
   const y = window.scrollY;
   const me = person(S.me);
   if (!me || S.managing) { $app.innerHTML = profileHTML(); return; }
-  const tabs = [['mine', 'My week'], ['all', 'Everyone'], ['gap', 'Free time'], ['tasks', 'Tasks'], ['settings', 'Settings']];
-  const body = { mine: () => mineHTML(me), all: everyoneHTML, gap: gapHTML, tasks: tasksHTML, settings: settingsHTML }[S.tab]();
-  const weekly = !['tasks', 'settings'].includes(S.tab);
-  $app.innerHTML = `<div class="wrap"><header><h1>Schedule Planner</h1><div><span class="dot" style="background:${me.color}"></span>${esc(me.name)} <button class="link" data-act="switch">Switch</button> <button class="link" data-act="theme" title="Theme">${THEMES[S.theme]}</button></div></header>
-    <nav>${tabs.map(([k, l]) => `<button class="${S.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</nav>
-    ${weekly ? weekNavHTML() : ''}${body}</div>`;
+  const tabs = [['mine', 'My week'], ['group', 'Group'], ['tasks', 'Tasks'], ['settings', 'Settings']];
+  const body = { mine: () => mineHTML(me), group: groupHTML, tasks: tasksHTML, settings: settingsHTML }[S.tab]();
+  $app.innerHTML = `<div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo"><div class="logo-mark">S</div><h1>Planner</h1></div>
+        <nav>${tabs.map(([k, l]) => `<button class="${S.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</nav>
+      </div>
+      <div class="user-actions">
+        <button class="link" data-act="switch" title="Switch User"><span class="dot" style="background:${me.color}"></span>${esc(me.name)} &#9662;</button>
+        <button class="link" data-act="theme" title="Theme: ${THEMES[S.theme]}" aria-label="Change theme">${{ auto: '&#9680;', light: '&#9788;', dark: '&#9790;' }[S.theme]}</button>
+      </div>
+    </header>
+    ${body}
+  </div>`;
   S.anchor = null;
   window.scrollTo(0, y);
 }
 
-// ---------- editing interactions on the "My week" grid ----------
+// ---------- editing interactions on the "My Schedule" grid ----------
 let lastPT = 'mouse';
 const colOf = el => el && el.closest ? el.closest('#grid.edit .tg-col') : null;
 const minAt = (col, y) => { const r = col.getBoundingClientRect(); return Math.max(hs(), Math.min(he(), hs() + (y - r.top) / PPH * 60)); };
-function rangeOf(a, b) { // inclusive of the snap cell under each end, clamped to visible hours
+function rangeOf(a, b) {
   let lo = L.snapFloor(Math.min(a, b), S.snap), hi = Math.min(he(), L.snapFloor(Math.max(a, b), S.snap) + S.snap);
   lo = Math.min(lo, hi - S.snap);
   return [Math.max(hs(), lo), hi];
@@ -612,7 +765,7 @@ function showBand(col, lo, hi) {
 }
 const clearBands = () => document.querySelectorAll('.band').forEach(b => b.remove());
 
-async function staleFor(weekDates) { // editing availability makes the affected weeks unconfirmed again
+async function staleFor(weekDates) {
   const wk = L.mondayOf(todayStr());
   const ids = S.db.confirmations.filter(c => c.personId === S.me && weekDates.some(w => w == null ? c.weekDate >= wk : c.weekDate === w)).map(c => c.id);
   if (ids.length) await Repo.remove('confirmations', ids);
@@ -643,7 +796,7 @@ document.addEventListener('pointermove', e => {
 document.addEventListener('pointerup', () => {
   const dr = S.drag; if (!dr) return;
   S.drag = null; clearBands();
-  if (!dr.moved) return; // a plain click on empty space creates nothing
+  if (!dr.moved) return;
   const [lo, hi] = rangeOf(dr.a, dr.b);
   commitDrag(dr.d, lo, hi);
 });
@@ -655,17 +808,16 @@ function openEditor(id) {
   S.editBlock = id; S.editErr = [];
   S.editForm = { type: b.type, label: b.label || '', day: b.day, start: L.fmtTimeInput(b.start), end: L.fmtTimeInput(b.end), private: !!b.private };
   render();
-  const f = document.querySelector('form[data-submit=saveblock]'); if (f && f.scrollIntoView) f.scrollIntoView({ block: 'nearest' });
 }
 document.addEventListener('click', async e => {
   const blk = e.target.closest('.blk');
   if (blk) {
     if (S.tab === 'mine') openEditor(blk.dataset.id);
-    else if (S.tab === 'all') { S.peek = S.peek === blk.dataset.id ? null : blk.dataset.id; render(); }
+    else if (S.tab === 'group' && S.groupMode === 'overlay') { S.peek = S.peek === blk.dataset.id ? null : blk.dataset.id; render(); }
     return;
   }
   const col = colOf(e.target);
-  if (col) { // touch: tap start, tap end
+  if (col) {
     if (lastPT !== 'touch') return;
     const d = +col.dataset.d, m = minAt(col, e.clientY);
     if (S.anchor && S.anchor.d === d) { const a = S.anchor.a; S.anchor = null; clearBands(); const [lo, hi] = rangeOf(a, m); commitDrag(d, lo, hi); }
@@ -674,6 +826,7 @@ document.addEventListener('click', async e => {
   }
   const el = e.target.closest('[data-act]'); if (!el) return;
   const a = el.dataset.act, id = el.dataset.id, v = el.dataset.v;
+  if ((a === 'closemodal' || a === 'cancelblock' || a === 'canceledit') && e.target !== el) return; // click bubbled from inside the modal, not a backdrop tap
   const go = () => { savePrefs(); render(); };
   if (a === 'pick') { S.me = id; S.managing = false; resetTransient(); go(); }
   else if (a === 'switch') { S.managing = true; render(); }
@@ -694,8 +847,12 @@ document.addEventListener('click', async e => {
     go();
   }
   else if (a === 'tab') { S.tab = v; resetTransient(); go(); }
+  else if (a === 'gmode') { S.groupMode = v; S.peek = null; go(); }
+  else if (a === 'closepeek') { S.peek = null; render(); }
   else if (a === 'wk') { S.week = L.addDays(S.week, 7 * +v); resetTransient(); render(); }
   else if (a === 'thisweek') { S.week = L.mondayOf(todayStr()); resetTransient(); render(); }
+  else if (a === 'openadd') { S.showAddModal = true; S.addErr = []; render(); }
+  else if (a === 'closemodal') { S.showAddModal = false; S.addErr = []; render(); }
   else if (a === 'typesel') { S.typeSel = id; go(); }
   else if (a === 'newday') { const d = +v; S.newDays = S.newDays.includes(d) ? S.newDays.filter(x => x !== d) : [...S.newDays, d].sort(); render(); }
   else if (a === 'editblock') openEditor(id);
@@ -707,8 +864,8 @@ document.addEventListener('click', async e => {
   }
   else if (a === 'copy') {
     const r = L.copyWeekBlocks(S.db.blocks, S.me, L.addDays(S.week, -7), S.week, uid);
-    if (!r.add.length) { alert('No this-week events found in the previous week. Weekly events repeat on their own.'); return; }
-    if (r.remove.length && !confirm(`Replace the ${r.remove.length} this-week event(s) already in this week with last week's ${r.add.length}?`)) return;
+    if (!r.add.length) { alert('No 1-week events found in the previous week. Weekly events repeat automatically.'); return; }
+    if (r.remove.length && !confirm(`Replace the ${r.remove.length} 1-week event(s) already in this week with last week's ${r.add.length}?`)) return;
     await act(async () => { if (r.remove.length) await Repo.remove('blocks', r.remove); await Repo.upsert('blocks', r.add); await staleFor([S.week]); });
   }
   else if (a === 'confirm') {
@@ -727,6 +884,7 @@ document.addEventListener('click', async e => {
     render();
   }
   else if (a === 'filter') { S.filter = v; render(); }
+  else if (a === 'opentask') { S.form = newForm(); S.editing = null; S.formErr = []; S.showTaskModal = true; render(); }
   else if (a === 'assignee') {
     const f = S.form;
     if (f.category === 'personal') f.assigneeIds = [id];
@@ -737,10 +895,9 @@ document.addEventListener('click', async e => {
   else if (a === 'edittask') {
     const t = S.db.tasks.find(x => x.id === id);
     S.form = { title: t.title, category: t.category, assigneeIds: t.assigneeIds.slice(), dueDate: t.dueDate };
-    S.editing = id; S.formErr = []; render();
-    document.getElementById('taskform').scrollIntoView();
+    S.editing = id; S.showTaskModal = true; S.formErr = []; render();
   }
-  else if (a === 'canceledit') { S.editing = null; S.form = newForm(); S.formErr = []; render(); }
+  else if (a === 'canceledit') { S.editing = null; S.showTaskModal = false; S.form = newForm(); S.formErr = []; render(); }
   else if (a === 'deltask') { if (confirm('Delete this task?')) await act(() => Repo.remove('tasks', id)); }
 });
 
@@ -762,7 +919,7 @@ document.addEventListener('submit', async e => {
     S.addErr = [...new Set(errs)];
     if (S.addErr.length) { render(); return; }
     const blocks = S.newDays.map(d => newBlock(d, start, end, t));
-    S.newLabel = ''; S.newDays = [];
+    S.newLabel = ''; S.newDays = []; S.showAddModal = false;
     await act(async () => { await Repo.upsert('blocks', blocks); await staleFor([blocks[0].weekDate]); });
   } else if (k === 'saveblock') {
     const old = S.db.blocks.find(b => b.id === S.editBlock); if (!old) return;
@@ -787,7 +944,7 @@ document.addEventListener('submit', async e => {
       dueDate: f.dueDate, status: old ? old.status : 'todo' };
     S.formErr = L.validateTask(t, S.db.people);
     if (S.formErr.length) { render(); return; }
-    S.editing = null; S.form = newForm();
+    S.editing = null; S.showTaskModal = false; S.form = newForm();
     await act(() => Repo.upsert('tasks', t));
   }
 });
